@@ -813,6 +813,7 @@ page:CreateSwitch("Notify enteties for others",
 local esm = page:CreateTextBox("Entity spawned message",
 	function(text)
 		spawnedMessage = text
+		pagelist.Notify(text,5)
 	end
 )
 page:CreateSwitch("No seek",
@@ -915,39 +916,20 @@ page:CreateLabel("!Bypass anticheat works only in starting elevator at item shop
 local page = pagelist.CreatePage("Trolling")
 local activateToolsBool = false
 function activateTools()
-	rs(1)
-	if activateToolsBool then return end
-	local timee = 11
-	for i,v in pairs(tools) do
-		if v and v.Parent and v.Parent ~= char and v.Parent ~= plr.Backpack and v:FindFirstChild("Remote") and v.Remote:IsA("RemoteEvent") then
-			timee += 1
-		end
-		timee += 1
-	end
 	coroutine.wrap(function()
-		local tool = plr.Character:FindFirstChildOfClass("Tool")
+		rs(1)
+		if activateToolsBool then return end
 		activateToolsBool = true
-		if tool then
-			tool.Parent = plr.Backpack
-		end
-		rs(5)
+		rs(1)
 		for i,v in pairs(tools) do
-			if v and v.Parent and v.Parent ~= char and v.Parent ~= plr.Backpack and v:FindFirstChild("Remote") and v.Remote:IsA("RemoteEvent") then
-				local prevParent = v.Parent
-				v.Parent = plr.Character
-				rs(1)
+			if v and v:FindFirstChild("Remote") and v.Remote:IsA("RemoteEvent") and v.Parent ~= char and v.Parent ~= plr.Backpack then
 				v.Remote:FireServer()
-				v.Parent = prevParent
 			end
-			rs(1)
 		end
-		rs(5)
-		if tool then
-			tool.Parent = plr.Character
-		end
+		rs(1)
+		activateToolsBool = false
 	end)()
-	rs(timee)
-	activateToolsBool = false
+	rs(3)
 end
 page:CreateButton("Activate other's tools",
 	function()
