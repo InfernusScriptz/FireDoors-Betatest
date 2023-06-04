@@ -780,7 +780,7 @@ page:CreateSwitch("Far open doors",
 		bools.FarDoors = bool
 	end
 )
-page:CreateSwitch("Complete elevator minigame",
+page:CreateSwitch("Auto complete elevator minigame",
 	function(bool)
 		bools.AutoFixElevator = bool
 	end
@@ -1027,19 +1027,23 @@ coroutine.wrap(function()
 		if bools.AutoFixElevator then
 			game.ReplicatedStorage.EntityInfo.EBF:FireServer()
 			game.ReplicatedStorage.Bricks.EBF:FireServer()
-			if workspace.CurrentRooms:FindFirstChild("100") and workspace.CurrentRooms["100"]:FindFirstChild("ElevatorCar") and workspace.CurrentRooms["100"].ElevatorCar:FindFirstChild("ActualCollision") and workspace.CurrentRooms["100"].ElevatorCar.ActualCollision:FindFirstChild("ElevatorPanel") and workspace.CurrentRooms["100"].ElevatorCar.ActualCollision.ElevatorPanel:FindFirstChild("ElevatorLight") and not fixed then
-				fixed = true
-				local target = workspace.CurrentRooms["100"].ElevatorCar.ActualCollision.ElevatorPanel:FindFirstChild("ElevatorLight")
-				repeat
-					rs(1)
-				until closed or not target or target.Material == Enum.Material.Neon
-				if not closed and target and target.Material == Enum.Material.Neon then
-					pagelist.Notify([[Elevator has been repaired!
-Please, disable god-mode (if it is enabled), and go to elevator!]])
-				end
-			end
 		end
-		task.wait(0)
+		if bools.AutoFixElevator then
+			coroutine.wrap(function()
+				if workspace.CurrentRooms:FindFirstChild("100") and workspace.CurrentRooms["100"]:FindFirstChild("ElevatorCar") and workspace.CurrentRooms["100"].ElevatorCar:FindFirstChild("ActualCollision") and workspace.CurrentRooms["100"].ElevatorCar.ActualCollision:FindFirstChild("ElevatorPanel") and workspace.CurrentRooms["100"].ElevatorCar.ActualCollision.ElevatorPanel:FindFirstChild("ElevatorLight") and not fixed then
+					fixed = true
+					local target = workspace.CurrentRooms["100"].ElevatorCar.ActualCollision.ElevatorPanel:FindFirstChild("ElevatorLight")
+					repeat
+						rs(1)
+					until closed or not target or target.Material == Enum.Material.Neon
+					if not closed and target and target.Material == Enum.Material.Neon then
+						pagelist.Notify([[Elevator has been repaired!
+Please, disable god-mode (if it is enabled), and go to elevator!]])
+					end
+				end
+			end)()
+		end
+		rs(1)
 	until closed
 end)()
 textLabel = page:CreateTextBox("Spam speed (in seconds)",
