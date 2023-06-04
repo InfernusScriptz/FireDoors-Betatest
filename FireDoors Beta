@@ -1071,7 +1071,7 @@ flexSpeed = page:CreateTextBox("Achievement flex speed",
 		end
 	end
 )
-flexSpeed = PREVText
+flexSpeed.Text = PREVText
 page:CreateSwitch("Spam walk sound",
 	function(bool)
 		bools.SpamWalkSound = bool
