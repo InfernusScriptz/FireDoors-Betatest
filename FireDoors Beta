@@ -89,7 +89,7 @@ function WaitForChildOfClass(where,className)
 		end)()
 		repeat
 			game["Run Service"].Stepped:Wait()
-		until where:FindFirstChildOfClass(className) or not where or closed
+		until where:FindFirstChildOfClass(className) or not where or closed or where:IsDescendantOf(nil)
 		if where then
 			return where:FindFirstChildOfClass(className)
 		else
@@ -294,8 +294,8 @@ function descendant(d)
 						if bools.FarDoors then
 							d:FireServer()
 						end
-						rs(20)
-					until closed or not d
+						rs(10)
+					until closed or not d or not d:IsDescendantOf(workspace)
 				end
 			end
 			if d:IsA("ProximityPrompt") and not ppNames[d.Name] then
@@ -322,7 +322,7 @@ function descendant(d)
 						can = false
 					end
 					if d:IsDescendantOf(workspace.CurrentRooms["100"]:FindFirstChild("ElevatorBreaker")) then
-						can = false
+						can = true
 					end
 					if d.Parent.Name == "ElevatorBreaker" then
 						can = false
@@ -357,6 +357,14 @@ function descendant(d)
 				until not d or closed or not can or not d:IsDescendantOf(workspace)
 			end
 			if d:IsA("Model") and not d:IsA("Tool") then
+				if d.Name == "LiveBreakerPolePickup" then
+					repeat
+						if bools.AutoInteract then
+							fireproximityprompt(d:WaitForChild("ActivateEventPrompt"),1,true)
+						end
+						rs(1)
+					until closed or not d or not d:IsDescendantOf(workspace) or d:IsDescendantOf(nil)
+				end
 				if d.Name == "TriggerEventCollision" then
 					wait(0.5)
 					coroutine.wrap(function()
@@ -447,7 +455,7 @@ function descendant(d)
 							end
 						end
 						rs(60)
-					until closed
+					until closed or not d or not d:IsDescendantOf(workspace)
 				end
 				if d.Name == "Door" and isnumber(d.Parent.Name) then
 					wait(0.5)
@@ -852,22 +860,28 @@ page:CreateSwitch("No screech",
 )
 connectedFunctions[#connectedFunctions+1] = event.Event:Connect(function(state,value)
 	if state == "Entity" and value then
-		WaitForChildOfClass(value,"Part").Changed:Wait()
-		WaitForChildOfClass(value,"Part").Changed:Wait()
-		esp(value,Color3.fromRGB(150,0,0),string.split(value.Name,"Moving")[1],"EntityESP")
-		if bools.NotifyEntities then
-			pagelist.Notify(string.split(value.Name,"Moving")[1]..[[!]],10)
+		if value then
+			WaitForChildOfClass(value,"Part").Changed:Wait()
 		end
-		if bools.NotifyEntetiesForOthers then
-			local message = string.split(spawnedMessage,"{mob}")
-			local output = ""
-			output = message[1]
-			for i,v in pairs(message) do
-				if i ~= 1 then
-					output = output..string.split(value.Name,"Moving")[1]..v
-				end
+		if value then
+			WaitForChildOfClass(value,"Part").Changed:Wait()
+		end
+		if value then
+			esp(value,Color3.fromRGB(150,0,0),string.split(value.Name,"Moving")[1],"EntityESP")
+			if bools.NotifyEntities then
+				pagelist.Notify(string.split(value.Name,"Moving")[1]..[[!]],10)
 			end
-			sendMessage(output)
+			if bools.NotifyEntetiesForOthers then
+				local message = string.split(spawnedMessage,"{mob}")
+				local output = ""
+				output = message[1]
+				for i,v in pairs(message) do
+					if i ~= 1 then
+						output = output..string.split(value.Name,"Moving")[1]..v
+					end
+				end
+				sendMessage(output)
+			end
 		end
 	end
 end)
@@ -998,6 +1012,7 @@ coroutine.wrap(function()
 		rs(1)
 	until closed
 end)()
+local fixed = false
 coroutine.wrap(function()
 	repeat
 		if bools.SpamWalkSound then
@@ -1006,6 +1021,12 @@ coroutine.wrap(function()
 		if bools.AutoFixElevator then
 			game.ReplicatedStorage.EntityInfo.EBF:FireServer()
 			game.ReplicatedStorage.Bricks.EBF:FireServer()
+			if workspace.CurrentRooms:FindFirstChild("100") and workspace.CurrentRooms["100"]:FindFirstChild("FigureSetup") and workspace.CurrentRooms["100"].FigureSetup:FindFirstChild("BreakerFixed") and not fixed then
+				workspace.CurrentRooms["100"].FigureSetup.BreakerFixed.Event:Wait()
+				fixed = true
+				pagelist.Notify([[Elevator fixed!
+Now go to elevator!]],10)
+			end
 		end
 		task.wait(0)
 	until closed
@@ -1066,6 +1087,17 @@ page:CreateButton("Play Again",
 page:CreateButton("Lobby",
 	function()
 		game.ReplicatedStorage.EntityInfo.Lobby:FireServer()
+	end
+)
+page:CreateSwitch("Fix mystery lag",
+	function(bool)
+		game:GetService("Players").LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.PromptService.Disabled = bool
+		game:GetService("Players").LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.Updated.Disabled = bool
+		if game:GetService("ReplicatedStorage").ClientModules:FindFirstChild("Module_Events") then
+			game:GetService("ReplicatedStorage").ClientModules.Module_Events.Name = "Not Module_Events"
+		else
+			game:GetService("ReplicatedStorage").ClientModules["Not Module_Events"].Name = "Module_Events"
+		end
 	end
 )
 for i,d in pairs(workspace:GetDescendants()) do
