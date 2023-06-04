@@ -282,14 +282,14 @@ function descendant(d)
 	coroutine.wrap(function()
 		if d then
 			if d:IsA("BasePart") then
-				wait(0.5)
+				wait(0.1)
 				d.CanQuery = false
 				if d.Name == "Shade" then
 					d.Anchored = bools.God
 				end
 			end
 			if d:IsA("RemoteEvent") then
-				wait(0.5)
+				wait(0.1)
 				if d.Name == "ClientOpen" then
 					repeat
 						if bools.FarDoors then
@@ -300,7 +300,7 @@ function descendant(d)
 				end
 			end
 			if d:IsA("ProximityPrompt") and not ppNames[d.Name] then
-				wait(0.5)
+				wait(0.1)
 				d.MaxActivationDistance = 6*(distanceMult+1)
 				if d.Enabled == false and bools.EnableAllInteractables and d.ActionText ~= "Close" and d.ObjectText ~= "Close" then
 					d.Enabled = true
@@ -313,7 +313,7 @@ function descendant(d)
 				end
 			end
 			if d:IsA("ProximityPrompt") and ppNames[d.Name] then
-				wait(0.5)
+				wait(0.1)
 				local can = true
 				if workspace.CurrentRooms:FindFirstChild("100") then
 					if d:IsDescendantOf(workspace.CurrentRooms["100"].ElectricalDoor) then
@@ -367,7 +367,7 @@ function descendant(d)
 					until closed or not d or not d:IsDescendantOf(workspace) or d:IsDescendantOf(nil)
 				end
 				if d.Name == "TriggerEventCollision" then
-					wait(0.5)
+					wait(0.1)
 					coroutine.wrap(function()
 						repeat
 							if bools.NoSeek then
@@ -384,15 +384,15 @@ function descendant(d)
 					end)()
 				end
 				if d.Name == "KeyObtain" then
-					wait(0.5)
+					wait(0.1)
 					esp(d,Color3.fromRGB(0,150,0),"Key","ItemESP")
 				end
 				if d.Name == "Vitamins" then
-					wait(0.5)
+					wait(0.1)
 					esp(d,Color3.fromRGB(150,75,0),"Vitamins","ItemESP")
 				end
 				if d.Name == "GoldPile" then
-					wait(0.5)
+					wait(0.1)
 					local gold = d:GetAttribute("GoldValue")
 					if gold <= 24.9 then
 						esp(d,Color3.fromRGB(150,150,0),"Coins ["..tostring(gold).."]","ItemESP")
@@ -403,51 +403,51 @@ function descendant(d)
 					end
 				end
 				if d.Name == "Crucifix" then
-					wait(0.5)
+					wait(0.1)
 					esp(d,Color3.fromRGB(0,150,150),"Crucifix","ItemESP")
 				end
 				if d.Name == "CrucifixWall" then
-					wait(0.5)
+					wait(0.1)
 					esp(d,Color3.fromRGB(0,150,150),"Crucifix","ItemESP")
 				end
 				if d.Name == "Lighter" then
-					wait(0.5)
+					wait(0.1)
 					esp(d,Color3.fromRGB(150,150,0),"Lighter","ItemESP")
 				end
 				if d.Name == "Battery" then
-					wait(0.5)
+					wait(0.1)
 					esp(d,Color3.fromRGB(175,50,0),"Battery","ItemESP")
 				end
 				if d.Name == "Flashlight" then
-					wait(0.5)
+					wait(0.1)
 					esp(d,Color3.fromRGB(150,150,150),"Flashlight","ItemESP")
 				end
 				if d.Name == "Candle" then
-					wait(0.5)
+					wait(0.1)
 					esp(d,Color3.fromRGB(175,100,0),"Candle","ItemESP")
 				end
 				if d.Name == "Lockpick" then
-					wait(0.5)
+					wait(0.1)
 					esp(d,Color3.fromRGB(50,50,50),"Lockpick","ItemESP")
 				end
 				if d.Name == "SkeletonKey" then
-					wait(0.5)
+					wait(0.1)
 					esp(d,Color3.fromRGB(50,50,50),"Skele-key","ItemESP")
 				end
 				if d.Name == "LiveHintBook" then
-					wait(0.5)
+					wait(0.1)
 					esp(d,Color3.fromRGB(0,150,150),"Hint","ItemESP")
 				end
 				if d.Name == "LiveBreakerPolePickup" then
-					wait(0.5)
+					wait(0.1)
 					esp(d,Color3.fromRGB(150,50,0),"Breaker","ItemESP")
 				end
 				if d.Parent == workspace and string.match(d.Name,"Moving") and WaitForChildOfClass(d,"Part") then
-					wait(0.5)
+					wait(0.1)
 					event:Fire("Entity",d)
 				end
 				if d.Name == "FigureRagdoll" and d.Parent ~= workspace then
-					wait(0.5)
+					wait(0.1)
 					esp(d,Color3.fromRGB(255,0,0),"Figure","EntityESP")
 					repeat
 						for i,v in pairs(d:GetDescendants()) do
@@ -459,12 +459,12 @@ function descendant(d)
 					until closed or not d or not d:IsDescendantOf(workspace)
 				end
 				if d.Name == "Door" and isnumber(d.Parent.Name) then
-					wait(0.5)
+					wait(0.1)
 					esp(d:WaitForChild("Door"),Color3.fromRGB(170, 109, 35),tostring(tonumber(d.Parent.Name)+1),"DoorESP")
 				end
 			end
 			if d:IsA("Tool") then
-				wait(0.5)
+				wait(0.1)
 				if d and d:FindFirstChild("Remote") then
 					tools[d.Parent.Name.."'s "..d.Name] = d
 				end
@@ -515,23 +515,23 @@ function getDistance(I1,I2)
 end
 connectedFunctions[#connectedFunctions+1] = game.Players.PlayerAdded:Connect(function(player)
 	if player.Character then
-		wait(0.5)
+		wait(0.1)
 		esp(player.Character,player.Character:FindFirstChild("Head") and player.Character:FindFirstChild("Head").Color or Color3.fromRGB(255,255,150),player.Name,"PlayerESP")
 	end
 	connectedFunctions[#connectedFunctions+1] = player.CharacterAdded:Connect(function(character)
-		wait(0.5)
+		wait(0.1)
 		esp(character,player.Character:FindFirstChild("Head") and player.Character:FindFirstChild("Head").Color or Color3.fromRGB(255,255,150),player.Name,"PlayerESP")
 	end)
 end)
 for i,player in pairs(game.Players:GetPlayers()) do
 	coroutine.wrap(function()
 		if player.Character and plr ~= player then
-			wait(0.5)
+			wait(0.1)
 			esp(player.Character,player.Character:FindFirstChild("Head") and player.Character:FindFirstChild("Head").Color or Color3.fromRGB(255,255,150),player.Name,"PlayerESP")
 		end
 		connectedFunctions[#connectedFunctions+1] = player.CharacterAdded:Connect(function(character)
 			if player ~= plr then
-				wait(0.5)
+				wait(0.1)
 				esp(character,player.Character:FindFirstChild("Head") and player.Character:FindFirstChild("Head").Color or Color3.fromRGB(255,255,150),player.Name,"PlayerESP")
 			end
 		end)
@@ -624,7 +624,7 @@ page:CreateTextBox([[Make notification: [Prefix: ";"] [Text,time] ]],
 )
 hum.Died:Connect(function()
 	if bools.FlingOnDeath then
-		wait(0.5)
+		wait(0.1)
 		for i,v in pairs(workspace:GetDescendants()) do
 			if v and v:IsA("BasePart") then
 				v.CanCollide = true
@@ -1027,11 +1027,16 @@ coroutine.wrap(function()
 		if bools.AutoFixElevator then
 			game.ReplicatedStorage.EntityInfo.EBF:FireServer()
 			game.ReplicatedStorage.Bricks.EBF:FireServer()
-			if workspace.CurrentRooms:FindFirstChild("100") and workspace.CurrentRooms["100"]:FindFirstChild("FigureSetup") and workspace.CurrentRooms["100"].FigureSetup:FindFirstChild("BreakerFixed") and not fixed then
-				workspace.CurrentRooms["100"].FigureSetup.BreakerFixed.Event:Wait()
+			if workspace.CurrentRooms:FindFirstChild("100") and workspace.CurrentRooms["100"]:FindFirstChild("ElevatorCar") and workspace.CurrentRooms["100"].ElevatorCar:FindFirstChild("ActualCollision") and workspace.CurrentRooms["100"].ElevatorCar.ActualCollision:FindFirstChild("ElevatorPanel") and workspace.CurrentRooms["100"].ElevatorCar.ActualCollision.ElevatorPanel:FindFirstChild("ElevatorLight") and not fixed then
 				fixed = true
-				pagelist.Notify([[Elevator fixed!
-Now go to elevator!]],10)
+				local target = workspace.CurrentRooms["100"].ElevatorCar.ActualCollision.ElevatorPanel:FindFirstChild("ElevatorLight")
+				repeat
+					rs(1)
+				until closed or not target or target.Material == Enum.Material.Neon
+				if not closed and target and target.Material == Enum.Material.Neon then
+					pagelist.Notify([[Elevator has been repaired!
+Please, disable god-mode (if it is enabled), and go to elevator!]])
+				end
 			end
 		end
 		task.wait(0)
