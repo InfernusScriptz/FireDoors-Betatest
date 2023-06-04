@@ -44,7 +44,7 @@ local bools = {
 	["SpamWalkSound"] = false,
 	["AutoFixElevator"] = false,
 	["ShowBackpacks"] = false,
-	["NotifyWhenPlayerEntersOrLeaves"]
+	["NotifyWhenPlayerEntersOrLeaves"] = false,
 }
 local closed = false
 local Font = Enum.Font.Oswald
