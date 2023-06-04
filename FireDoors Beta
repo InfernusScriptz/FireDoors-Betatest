@@ -44,6 +44,7 @@ local bools = {
 	["SpamWalkSound"] = false,
 	["AutoFixElevator"] = false,
 	["ShowBackpacks"] = false,
+	["NotifyWhenPlayerEntersOrLeaves"]
 }
 local closed = false
 local Font = Enum.Font.Oswald
@@ -771,21 +772,21 @@ You are blacklisted!]],15)
 	return
 end
 local page = pageList.CreatePage("Main")
-page:CreateLabel("Exclusive hub for "..fullName)
-page:CreateLabel("Hub was made in 1.5 days")
-page:CreateLabel("Whole script was made in [Still in developement]")
-page:CreateLabel(fullName.." was made by GodWorldX - Infernus#0863")
-page:CreateTextBox("Custom logo [IMAGE ID]",
+page.CreateLabel("Exclusive hub for "..fullName)
+page.CreateLabel("Hub was made in 1.5 days")
+page.CreateLabel("Whole script was made in [Still in developement]")
+page.CreateLabel(fullName.." was made by GodWorldX - Infernus#0863")
+page.CreateTextBox("Custom logo [IMAGE ID]",
 	function(id)
 		logo.Image = id
 	end
 )
-page:CreateTextBox("Custom name",
+page.CreateTextBox("Custom name",
 	function(id)
 		title.Text = id
 	end
 )
-page:CreateTextBox([[Make notification: [Prefix: ";"] [Text,time] ]],
+page.CreateTextBox([[Make notification: [Prefix: ";"] [Text,time] ]],
 	function(id)
 		local split = string.split(id,";")
 		if not isnumber(split[2]) or #split ~= 2 then
@@ -831,7 +832,7 @@ hum.Died:Connect(function()
 	end
 end)
 local page = pagelist.CreatePage("Character")
-page:CreateSwitch("Noclip",
+page.CreateSwitch("Noclip",
 	function(val)
 		bools.Noclipping = val
 		if bools.Noclipping then
@@ -853,28 +854,28 @@ local extraSpeed = 0
 connectedFunctions[#connectedFunctions+1] = game["Run Service"].Stepped:Connect(function()
 	hum:SetAttribute("SpeedBoost",extraSpeed)
 end)
-local ex1 = page:CreateSlider("Extra Speed",0,6,1,
+local ex1 = page.CreateSlider("Extra Speed",0,6,1,
 	function(val)
 		extraSpeed = val
 	end
 )
-local ex2 = page:CreateSlider("Extra Speed",0,100,6,
+local ex2 = page.CreateSlider("Extra Speed",0,100,6,
 	function(val)
 		extraSpeed = val
 	end
 )
-page:CreateSwitch("Enable jumping",
+page.CreateSwitch("Enable jumping",
 	function(bool)
 		bools.EnableJumping = bool
 	end
 )
-page:CreateSwitch("Fling on death",
+page.CreateSwitch("Fling on death",
 	function(bool)
 		bools.FlingOnDeath = bool
 	end
 )
 local moving = false
-page:CreateButton("Back to map",
+page.CreateButton("Back to map",
 	function()
 		if moving then return end
 		moving = true
@@ -887,13 +888,13 @@ page:CreateButton("Back to map",
 		local room = workspace.CurrentRooms:FindFirstChild(tostring(best-2))
 		local timee = ((room.Door.Door.Position-hrp.Position).Magnitude)/hum.WalkSpeed
 		hrp.Anchored = true
-		game.TweenService:Create(hrp,TweenInfo.new(timee,Enum.EasingStyle.Linear),{CFrame = room.Door.Door.CFrame}):Play()
+		game.TweenService.Create(hrp,TweenInfo.new(timee,Enum.EasingStyle.Linear),{CFrame = room.Door.Door.CFrame}):Play()
 		task.wait(timee)
 		hrp.Anchored = false
 		moving = false
 	end
 )
-page:CreateSwitch("God mode",
+page.CreateSwitch("God mode",
 	function(bool)
 		bools.God = bool
 		inGodMode = bool
@@ -904,7 +905,7 @@ page:CreateSwitch("God mode",
 		end
 	end
 )
-page:CreateSwitch("Player untouchable",
+page.CreateSwitch("Player untouchable",
 	function(bool)
 		bools.PlayerUntouchable = bool
 		for i,v in pairs(workspace:GetDescendants()) do
@@ -921,38 +922,38 @@ connectedFunctions[#connectedFunctions+1] = workspace.DescendantAdded:Connect(fu
 end)
 ex2.Visible = false
 local page = pagelist.CreatePage("Interactables")
-page:CreateSwitch("Auto interact",
+page.CreateSwitch("Auto interact",
 	function(bool)
 		bools.AutoInteract = bool
 	end
 )
-page:CreateSlider([[Activation distance
+page.CreateSlider([[Activation distance
 multiplier]],0,1,0.1,
 	function(num)
 		distanceMult = num
 	end
 )
-page:CreateSwitch("Enable every interactable",
+page.CreateSwitch("Enable every interactable",
 	function(bool)
 		bools.EnableAllInteractables = bool
 	end
 )
-page:CreateSwitch("Instant interact",
+page.CreateSwitch("Instant interact",
 	function(bool)
 		bools.InstantInteract = bool
 	end
 )
-page:CreateSwitch("Auto library code",
+page.CreateSwitch("Auto library code",
 	function(bool)
 		bools.AutoLibraryCode = bool
 	end
 )
-page:CreateSwitch("Far open doors",
+page.CreateSwitch("Far open doors",
 	function(bool)
 		bools.FarDoors = bool
 	end
 )
-page:CreateSwitch("Auto complete elevator minigame",
+page.CreateSwitch("Auto complete elevator minigame",
 	function(bool)
 		bools.AutoFixElevator = bool
 	end
@@ -964,55 +965,79 @@ connectedFunctions[#connectedFunctions+1] = game.ProximityPromptService.PromptBu
 	end
 end)
 local page = pagelist.CreatePage("ESP")
-page:CreateSwitch("Door ESP",
+page.CreateSwitch("Door ESP",
 	function(bool)
 		bools.DoorESP = bool
 	end
 )
-page:CreateSwitch("Entity ESP",
+page.CreateSwitch("Entity ESP",
 	function(bool)
 		bools.EntityESP = bool
 	end
 )
-page:CreateSwitch("Player ESP",
+page.CreateSwitch("Player ESP",
 	function(bool)
 		bools.PlayerESP = bool
 	end
 )
-page:CreateSwitch("Display player backpack",
+page.CreateSwitch("Display player backpack",
 	function(bool)
 		bools.ShowBackpacks = bool
 	end
 )
-page:CreateSwitch("Item ESP",
+page.CreateSwitch("Item ESP",
 	function(bool)
 		bools.ItemESP = bool
 	end
 )
-local page = pagelist.CreatePage("Enteties")
-page:CreateSwitch("Notify entities",
+local page = pagelist.CreatePage("Notifications")
+page.CreateSwitch("Notify entities",
 	function(bool)
 		bools.NotifyEntities = bool
 	end
 )
 local spawnedMessage = "{mob} has spawned!"
-page:CreateSwitch("Notify enteties for others",
+page.CreateSwitch("Notify enteties for others",
 	function(bool)
 		bools.NotifyEntetiesForOthers = bool
 	end
 )
-local esm = page:CreateTextBox("Entity spawned message",
+local esm = page.CreateTextBox("Entity spawned message",
 	function(text)
 		spawnedMessage = text
 		pagelist.Notify(text,5)
 	end
 )
-page:CreateSwitch("No seek",
+page.CreateSwitch("Notify when player enters/leaves",
+	function(bool)
+		bools.NotifyWhenPlayerEntersOrLeaves = bool
+	end
+)
+game.Players.PlayerAdded:Connect(function(plr)
+	if bools.NotifyWhenPlayerEntersOrLeaves then
+		if plr.DisplayName ~= "" or plr.DisplayName ~= nil then
+			pagelist.Notify(plr.Name.." ("..plr.DisplayName..") has entered the game!",10)
+		else
+			pagelist.Notify(plr.Name.." has entered the game!",10)
+		end
+	end
+end)
+game.Players.PlayerRemoving:Connect(function(plr)
+	if bools.NotifyWhenPlayerEntersOrLeaves then
+		if plr.DisplayName ~= "" or plr.DisplayName ~= nil then
+			pagelist.Notify(plr.Name.." ("..plr.DisplayName..") has leaved the game!",10)
+		else
+			pagelist.Notify(plr.Name.." has leaved the game!",10)
+		end
+	end
+end)
+local page = pagelist.CreatePage("Enteties")
+page.CreateSwitch("No seek",
 	function(bool)
 		bools.NoSeek = bool
 	end
 )
-local novoid = page:CreateSwitch("No void",
+local novoid = page.CreateSwitch("No void",
 	function(bool)
 		if game:GetService("ReplicatedStorage").ClientModules.EntityModules:FindFirstChild("Void") and bool then
 			game:GetService("ReplicatedStorage").ClientModules.EntityModules.Void.Name = "Not Void"
@@ -1023,7 +1048,7 @@ local novoid = page:CreateSwitch("No void",
 )
 local fakeScreech = Instance.new("Model",workspace.CurrentCamera)
 fakeScreech.Name = "Not Screech"
-page:CreateSwitch("No screech",
+page.CreateSwitch("No screech",
 	function(bool)
 		local name = "Not Screech"
 		if bool then
@@ -1076,7 +1101,7 @@ Hope, you will enjoy it :)
 it self-made hub!)]],15)
 local page = pagelist.CreatePage("Lighting")
 connectedFunctions[#connectedFunctions] = workspace.DescendantAdded:Connect(descendant)
-page:CreateSwitch("Full bright",
+page.CreateSwitch("Full bright",
 	function(bool)
 		bools.FullBright = bool
 		game.Lighting.Brightness = 1
@@ -1092,8 +1117,8 @@ connectedFunctions[#connectedFunctions+1] = game.Lighting.Changed:Connect(functi
 	end
 end)
 local page = pagelist.CreatePage("Anticheat")
-page:CreateLabel("In previos page we have god-mode function. It also bypassing anti-noclip")
-page:CreateButton("Bypass anticheat",
+page.CreateLabel("In previos page we have god-mode function. It also bypassing anti-noclip")
+page.CreateButton("Bypass anticheat",
 	function()
 		if not bypassedAC then
 			game:GetService("Players").LocalPlayer.PlayerGui.MainUI.ItemShop.Visible = false
@@ -1109,7 +1134,7 @@ page:CreateButton("Bypass anticheat",
 		end
 	end
 )
-page:CreateLabel("!Bypass anticheat works only in starting elevator at item shop menu!")
+page.CreateLabel("!Bypass anticheat works only in starting elevator at item shop menu!")
 local page = pagelist.CreatePage("Trolling")
 local activateToolsBool = false
 function activateTools()
@@ -1128,13 +1153,13 @@ function activateTools()
 	end)()
 	rs(3)
 end
-page:CreateButton("Activate other's tools",
+page.CreateButton("Activate other's tools",
 	function()
 		pagelist.Notify("Activated!")
 		activateTools()
 	end
 )
-page:CreateSwitch("Spam other's tools",
+page.CreateSwitch("Spam other's tools",
 	function(bool)
 		bools.SpamOthersTools = bool
 		if bool then
@@ -1223,7 +1248,7 @@ Please, disable god-mode (if it is enabled), and go to elevator!]])
 		rs(1)
 	until closed
 end)()
-textLabel = page:CreateTextBox("Spam speed (in seconds)",
+textLabel = page.CreateTextBox("Spam speed (in seconds)",
 	function(text)
 		if not isnumber(text) or isnumber(text) and tonumber(text) <= -0.01 then
 			textLabel.Text = prevText
@@ -1237,13 +1262,13 @@ textLabel = page:CreateTextBox("Spam speed (in seconds)",
 		end
 	end
 )
-page:CreateSwitch("Flex achievements",
+page.CreateSwitch("Flex achievements",
 	function(bool)
 		bools.FlexAchievements = bool
 	end
 )
 PREVText = "0"
-flexSpeed = page:CreateTextBox("Achievement flex speed",
+flexSpeed = page.CreateTextBox("Achievement flex speed",
 	function(text)
 		if not isnumber(text) or isnumber(text) and tonumber(text) <= -0.01 then
 			flexSpeed.Text = PREVText
@@ -1258,7 +1283,7 @@ flexSpeed = page:CreateTextBox("Achievement flex speed",
 	end
 )
 flexSpeed.Text = PREVText
-page:CreateSwitch("Spam walk sound",
+page.CreateSwitch("Spam walk sound",
 	function(bool)
 		bools.SpamWalkSound = bool
 	end
@@ -1266,22 +1291,22 @@ page:CreateSwitch("Spam walk sound",
 textLabel.Text = repeatTime
 prevText = textLabel.Text
 local page = pagelist.CreatePage("Other")
-page:CreateButton("Reset",
+page.CreateButton("Reset",
 	function()
 		hum.Health = -1
 	end
 )
-page:CreateButton("Play again",
+page.CreateButton("Play again",
 	function()
 		game.ReplicatedStorage.EntityInfo.PlayAgain:FireServer()
 	end
 )
-page:CreateButton("Lobby",
+page.CreateButton("Lobby",
 	function()
 		game.ReplicatedStorage.EntityInfo.Lobby:FireServer()
 	end
 )
-page:CreateSwitch("Fix mystery lag",
+page.CreateSwitch("Fix mystery lag",
 	function(bool)
 		game:GetService("Players").LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.PromptService.Disabled = bool
 		game:GetService("Players").LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.Updated.Disabled = bool
