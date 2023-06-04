@@ -28,6 +28,7 @@ local bools = {
 	["Noclipping"] = false,
 	["EnableAllInteractables"] = false,
 	["NotifyEntities"] = false,
+	["PlayerUntouchable"] = false,
 	["God"] = false,
 	["ItemESP"] = false,
 	["InstantInteract"] = false,
@@ -729,9 +730,14 @@ page:CreateSwitch("God mode",
 		else
 			char.Collision.Position = char.Collision.Position + Vector3.new(0,10,0)
 		end
+	end
+)
+page:CreateSwitch("Player Untouchable",
+	function(bool)
+		bools.PlayerUntouchable = bool
 		for i,v in pairs(workspace:GetDescendants()) do
 			if v and v:IsA("BasePart") then
-				v.CanTouch = not bool
+				v.CanTouch = not bools.PlayerUntouchable
 			end
 		end
 	end
