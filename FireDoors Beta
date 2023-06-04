@@ -14,7 +14,7 @@ local ppNames = {
 	["HerbPrompt"] = true,
 	["AwesomePrompt"] = true,
 	["UnlockPrompt"] = true,
-}
+} --lol
 local whitelist = loadstring(game:HttpGet("https://raw.githubusercontent.com/InfernusScriptz/Fire-Doors/main/Whitelist.lua"))()
 local pagelist,close,mainFrame,screenGui,logo,title = loadstring(game:HttpGet("https://raw.githubusercontent.com/InfernusScriptz/FireHub/main/hub.lua"))()
 local pageList = pagelist
