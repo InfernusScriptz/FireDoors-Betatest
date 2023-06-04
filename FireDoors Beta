@@ -1016,7 +1016,7 @@ enters/leaves]],
 )
 connectedFunctions[#connectedFunctions+1] = game.Players.PlayerAdded:Connect(function(plr)
 	if bools.NotifyWhenPlayerEntersOrLeaves then
-		if plr.DisplayName ~= "" or plr.DisplayName ~= nil then
+		if plr.DisplayName ~= "" and plr.DisplayName ~= nil and plr.DisplayName ~= plr.Name then
 			pagelist.Notify(plr.Name.." ("..plr.DisplayName..") has entered the game!",10)
 		else
 			pagelist.Notify(plr.Name.." has entered the game!",10)
@@ -1025,7 +1025,7 @@ connectedFunctions[#connectedFunctions+1] = game.Players.PlayerAdded:Connect(fun
 end)
 connectedFunctions[#connectedFunctions+1] = game.Players.PlayerRemoving:Connect(function(plr)
 	if bools.NotifyWhenPlayerEntersOrLeaves then
-		if plr.DisplayName ~= "" or plr.DisplayName ~= nil then
+		if plr.DisplayName ~= "" and plr.DisplayName ~= nil and plr.DisplayName ~= plr.Name then
 			pagelist.Notify(plr.Name.." ("..plr.DisplayName..") is leaving the game!",10)
 		else
 			pagelist.Notify(plr.Name.." is leaving the game!",10)
