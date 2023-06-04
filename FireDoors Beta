@@ -43,6 +43,7 @@ local bools = {
 	["AutoLibraryCode"] = false,
 	["SpamWalkSound"] = false,
 	["AutoFixElevator"] = false,
+	["ShowBackpacks"] = false,
 }
 local closed = false
 local Font = Enum.Font.Oswald
@@ -196,6 +197,9 @@ local function esp(target,color,text,boolName)
 			frame.AnchorPoint = Vector2.new(0.5,0.5)
 			frame.Position = UDim2.fromScale(0.5,0.5)
 			frame.Size = UDim2.fromScale(0.1,0.1)
+			local gradient = Instance.new("UIGradient",frame)
+			gradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0,Color3.fromRGB(255,255,255)),ColorSequenceKeypoint.new(1,Color3.fromRGB(75,75,75))}
+			gradient.Rotation = 90
 			local txt = Instance.new("TextLabel",bg)
 			txt.Text = text
 			txt.BackgroundTransparency = 1
@@ -272,6 +276,102 @@ local function esp(target,color,text,boolName)
 				end
 			end)()
 			return esp,frame,txt
+		end
+	end
+	if not target:IsA("Instance") then return end
+	return esp(target)
+end
+function display(target,color,text,boolName)
+	local color = Color3.fromRGB(255,255,255)
+	if target then
+		text = text or target.Name
+	end
+	local boolName = boolName or "nill"
+	if bools[boolName] == nil then
+		boolName = "nill"
+	end
+	local function esp(target)
+		local espDetected = false
+		local fldr = nil
+		if target and target.Parent  then
+			for i,v in pairs(target:GetChildren()) do
+				if v and v.Parent and v:IsA("Folder") and string.match(string.lower(v:GetFullName()),"display") then
+					espDetected = true
+					fldr = v
+				end
+			end
+		end
+		if target and target.Parent and not espDetected then
+			local folder = Instance.new("Folder",target)
+			folder.Name = "display"..randomString()
+			local bg = Instance.new("BillboardGui",folder)
+			bg.Size = UDim2.fromOffset(100,100)
+			bg.Brightness = 1
+			bg.AlwaysOnTop = true
+			bg.MaxDistance = 1000
+			bg.Adornee = target
+			bg.StudsOffset = Vector3.new(0,10,0)
+			local txt = Instance.new("TextLabel",bg)
+			txt.Text = text
+			txt.BackgroundTransparency = 1
+			txt.Size = UDim2.fromScale(1,0.5)
+			txt.AnchorPoint = Vector2.new(0.5,0.5)
+			txt.Position = UDim2.fromScale(0.5,0.65)
+			txt.Font = Font
+			txt.TextScaled = true
+			txt.TextColor3 = color
+			local stroke = Instance.new("UIStroke",txt)
+			stroke.Thickness = 3
+			stroke.Color = Color3.fromRGB(0,0,0)
+			for i,v in pairs(folder:GetDescendants()) do
+				if v then
+					v.Name = randomString()
+				end
+			end
+			coroutine.wrap(function()
+				repeat
+					if target and target.Parent then
+						if bools[boolName] == true then
+							bg.Enabled = bools[boolName]
+						else
+							bg.Enabled = false
+						end
+					end
+					rs(1)
+				until not target or closed or not target:IsDescendantOf(workspace)
+				if target and target.Parent then
+					if bools[boolName] == true then
+						bg.Enabled = bools[boolName]
+					else
+						bg.Enabled = false
+					end
+				end
+			end)()
+			return txt
+		elseif target and target.Parent and espDetected and fldr then
+			local bg = fldr:FindFirstChildOfClass("BillboardGui")
+			local txt = fldr:FindFirstChildOfClass("BillboardGui"):FindFirstChildOfClass("TextLabel")
+			coroutine.wrap(function()
+				repeat
+					if target and target.Parent then
+						if bools[boolName] == true then
+							bg.Enabled = bools[boolName]
+						else
+							bg.Enabled = false
+						end
+					end
+					rs(1)
+				until not target or closed or not target:IsDescendantOf(workspace)
+				rs(1)
+				if target and target.Parent then
+					if bools[boolName] == true then
+						bg.Enabled = esp.Enabled
+					else
+						bg.Enabled = false
+					end
+				end
+			end)()
+			return txt
 		end
 	end
 	if not target:IsA("Instance") then return end
@@ -517,10 +617,46 @@ connectedFunctions[#connectedFunctions+1] = game.Players.PlayerAdded:Connect(fun
 	if player.Character then
 		rs(1)
 		esp(player.Character,player.Character:FindFirstChild("Head") and player.Character:FindFirstChild("Head").Color or Color3.fromRGB(255,255,150),player.Name,"PlayerESP")
+		local text = display(player.Character,player.Character:FindFirstChild("Head") and player.Character:FindFirstChild("Head").Color or Color3.fromRGB(255,255,150),"","ShowBackpacks")
+		coroutine.wrap(function()
+			repeat
+				local Text = "["
+				for i,v in pairs(player.Backpack:GetChildren()) do
+					if v and v:IsA("Tool") then
+						Text = Text.." "..v.Name
+					end
+				end
+				if player.Character and player.Character:FindFirstChildOfClass("Tool") then
+					Text = Text.." "..player.Character:FindFirstChildOfClass("Tool").Name.." ]"
+				else
+					Text = Text.." ]"
+				end
+				text.Text = Text
+				rs(1)
+			until not text or closed
+		end)()
 	end
 	connectedFunctions[#connectedFunctions+1] = player.CharacterAdded:Connect(function(character)
 		rs(1)
 		esp(character,player.Character:FindFirstChild("Head") and player.Character:FindFirstChild("Head").Color or Color3.fromRGB(255,255,150),player.Name,"PlayerESP")
+		local text = display(player.Character,player.Character:FindFirstChild("Head") and player.Character:FindFirstChild("Head").Color or Color3.fromRGB(255,255,150),"","ShowBackpacks")
+		coroutine.wrap(function()
+			repeat
+				local Text = "["
+				for i,v in pairs(player.Backpack:GetChildren()) do
+					if v and v:IsA("Tool") then
+						Text = Text.." "..v.Name
+					end
+				end
+				if player.Character and player.Character:FindFirstChildOfClass("Tool") then
+					Text = Text.." "..player.Character:FindFirstChildOfClass("Tool").Name.." ]"
+				else
+					Text = Text.." ]"
+				end
+				text.Text = Text
+				rs(1)
+			until not text or closed
+		end)()
 	end)
 end)
 for i,player in pairs(game.Players:GetPlayers()) do
@@ -528,11 +664,47 @@ for i,player in pairs(game.Players:GetPlayers()) do
 		if player.Character and plr ~= player then
 			rs(1)
 			esp(player.Character,player.Character:FindFirstChild("Head") and player.Character:FindFirstChild("Head").Color or Color3.fromRGB(255,255,150),player.Name,"PlayerESP")
+			local text = display(player.Character,player.Character:FindFirstChild("Head") and player.Character:FindFirstChild("Head").Color or Color3.fromRGB(255,255,150),"","ShowBackpacks")
+			coroutine.wrap(function()
+				repeat
+					local Text = "["
+					for i,v in pairs(player.Backpack:GetChildren()) do
+						if v and v:IsA("Tool") then
+							Text = Text.." "..v.Name
+						end
+					end
+					if player.Character and player.Character:FindFirstChildOfClass("Tool") then
+						Text = Text.." "..player.Character:FindFirstChildOfClass("Tool").Name.." ]"
+					else
+						Text = Text.." ]"
+					end
+					text.Text = Text
+					rs(1)
+				until not text or closed
+			end)()
 		end
 		connectedFunctions[#connectedFunctions+1] = player.CharacterAdded:Connect(function(character)
 			if player ~= plr then
 				rs(1)
 				esp(character,player.Character:FindFirstChild("Head") and player.Character:FindFirstChild("Head").Color or Color3.fromRGB(255,255,150),player.Name,"PlayerESP")
+				local text = display(player.Character,player.Character:FindFirstChild("Head") and player.Character:FindFirstChild("Head").Color or Color3.fromRGB(255,255,150),"","ShowBackpacks")
+				coroutine.wrap(function()
+					repeat
+						local Text = "["
+						for i,v in pairs(player.Backpack:GetChildren()) do
+							if v and v:IsA("Tool") then
+								Text = Text.." "..v.Name
+							end
+						end
+						if player.Character and player.Character:FindFirstChildOfClass("Tool") then
+							Text = Text.." "..player.Character:FindFirstChildOfClass("Tool").Name.." ]"
+						else
+							Text = Text.." ]"
+						end
+						text.Text = Text
+						rs(1)
+					until not text or closed
+				end)()
 			end
 		end)
 	end)()
@@ -732,7 +904,7 @@ page:CreateSwitch("God mode",
 		end
 	end
 )
-page:CreateSwitch("Player Untouchable",
+page:CreateSwitch("Player untouchable",
 	function(bool)
 		bools.PlayerUntouchable = bool
 		for i,v in pairs(workspace:GetDescendants()) do
@@ -749,7 +921,7 @@ connectedFunctions[#connectedFunctions+1] = workspace.DescendantAdded:Connect(fu
 end)
 ex2.Visible = false
 local page = pagelist.CreatePage("Interactables")
-page:CreateSwitch("Auto Interact",
+page:CreateSwitch("Auto interact",
 	function(bool)
 		bools.AutoInteract = bool
 	end
@@ -765,7 +937,7 @@ page:CreateSwitch("Enable every interactable",
 		bools.EnableAllInteractables = bool
 	end
 )
-page:CreateSwitch("Instant Interact",
+page:CreateSwitch("Instant interact",
 	function(bool)
 		bools.InstantInteract = bool
 	end
@@ -805,6 +977,11 @@ page:CreateSwitch("Entity ESP",
 page:CreateSwitch("Player ESP",
 	function(bool)
 		bools.PlayerESP = bool
+	end
+)
+page:CreateSwitch("Display player backpack",
+	function(bool)
+		bools.ShowBackpacks = bool
 	end
 )
 page:CreateSwitch("Item ESP",
@@ -1094,7 +1271,7 @@ page:CreateButton("Reset",
 		hum.Health = -1
 	end
 )
-page:CreateButton("Play Again",
+page:CreateButton("Play again",
 	function()
 		game.ReplicatedStorage.EntityInfo.PlayAgain:FireServer()
 	end
