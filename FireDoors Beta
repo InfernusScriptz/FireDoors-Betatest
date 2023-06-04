@@ -14,7 +14,7 @@ local ppNames = {
 	["HerbPrompt"] = true,
 	["AwesomePrompt"] = true,
 	["UnlockPrompt"] = true,
-} --lol
+}
 local whitelist = loadstring(game:HttpGet("https://raw.githubusercontent.com/InfernusScriptz/Fire-Doors/main/Whitelist.lua"))()
 local pagelist,close,mainFrame,screenGui,logo,title = loadstring(game:HttpGet("https://raw.githubusercontent.com/InfernusScriptz/FireHub/main/hub.lua"))()
 local pageList = pagelist
@@ -1008,12 +1008,13 @@ local esm = page.CreateTextBox("Entity spawned message",
 		pagelist.Notify(text,5)
 	end
 )
-page.CreateSwitch("Notify when player enters/leaves",
+page.CreateSwitch([[Notify when player
+enters/leaves]],
 	function(bool)
 		bools.NotifyWhenPlayerEntersOrLeaves = bool
 	end
 )
-game.Players.PlayerAdded:Connect(function(plr)
+connectedFunctions[#connectedFunctions+1] = game.Players.PlayerAdded:Connect(function(plr)
 	if bools.NotifyWhenPlayerEntersOrLeaves then
 		if plr.DisplayName ~= "" or plr.DisplayName ~= nil then
 			pagelist.Notify(plr.Name.." ("..plr.DisplayName..") has entered the game!",10)
@@ -1022,12 +1023,12 @@ game.Players.PlayerAdded:Connect(function(plr)
 		end
 	end
 end)
-game.Players.PlayerRemoving:Connect(function(plr)
+connectedFunctions[#connectedFunctions+1] = game.Players.PlayerRemoving:Connect(function(plr)
 	if bools.NotifyWhenPlayerEntersOrLeaves then
 		if plr.DisplayName ~= "" or plr.DisplayName ~= nil then
-			pagelist.Notify(plr.Name.." ("..plr.DisplayName..") has leaved the game!",10)
+			pagelist.Notify(plr.Name.." ("..plr.DisplayName..") is leaving the game!",10)
 		else
-			pagelist.Notify(plr.Name.." has leaved the game!",10)
+			pagelist.Notify(plr.Name.." is leaving the game!",10)
 		end
 	end
 end)
