@@ -763,8 +763,11 @@ end)
 close.MouseButton1Click:Connect(function()
 	if closed then return end
 	closed = true
+	if bools.SpeedBypass then
+		collision.Position = collision.Position + Vector3.new(0,7.275,0)
+	end
 	if inGodMode then
-		collision.Position = collision.Position + Vector3.new(0,8,0)
+		collision.Position = collision.Position + Vector3.new(0,1.725,0)
 	end
 	for i,v in pairs(bools) do
 		if i and v then
@@ -940,9 +943,9 @@ page.CreateSwitch("God mode",
 		bools.God = bool
 		inGodMode = bool
 		if bool then
-			collision.Position = collision.Position - Vector3.new(0,8,0)
+			collision.Position = collision.Position - Vector3.new(0,1.725,0)
 		else
-			collision.Position = collision.Position + Vector3.new(0,8,0)
+			collision.Position = collision.Position + Vector3.new(0,1.725,0)
 		end
 	end
 )
@@ -1115,7 +1118,7 @@ page.CreateSwitch("No seek",
 		bools.NoSeek = bool
 	end
 )
-local novoid = page.CreateSwitch("No void",
+local novoid = page.CreateSwitch("No void jumpscare",
 	function(bool)
 		if game:GetService("ReplicatedStorage").ClientModules.EntityModules:FindFirstChild("Void") and bool then
 			game:GetService("ReplicatedStorage").ClientModules.EntityModules.Void.Name = "Not Void"
@@ -1124,25 +1127,39 @@ local novoid = page.CreateSwitch("No void",
 		end
 	end
 )
-local novoid = page.CreateSwitch("No A90",
+page.CreateSwitch("No timothy jumpscare",
 	function(bool)
-		if game:GetService("ReplicatedStorage").EntityInfo:FindFirstChild("A90") and bool then
-			game:GetService("ReplicatedStorage").EntityInfo.A90.Name = "Not A90"
-		elseif game:GetService("ReplicatedStorage").ClientModules.EntityModules:FindFirstChild("Not A90") and not bool then
-			game:GetService("ReplicatedStorage").EntityInfo["Not A90"].Name = "A90"
+		if game:GetService("ReplicatedStorage").ClientModules.EntityModules:FindFirstChild("SpiderJumpscare") and bool then
+			game:GetService("ReplicatedStorage").ClientModules.EntityModules.Void.Name = "Not SpiderJumpscare"
+		elseif game:GetService("ReplicatedStorage").ClientModules.EntityModules:FindFirstChild("Not SpiderJumpscare") and not bool then
+			game:GetService("ReplicatedStorage").ClientModules.EntityModules["Not SpiderJumpscare"].Name = "SpiderJumpscare"
+		end
+	end
+)
+page.CreateSwitch("No glitch jumpscare",
+	function(bool)
+		if game:GetService("ReplicatedStorage").ClientModules.EntityModules:FindFirstChild("Glitch") and bool then
+			game:GetService("ReplicatedStorage").ClientModules.EntityModules.Void.Name = "Not Glitch"
+		elseif game:GetService("ReplicatedStorage").ClientModules.EntityModules:FindFirstChild("Not Glitch") and not bool then
+			game:GetService("ReplicatedStorage").ClientModules.EntityModules["Not Glitch"].Name = "Glitch"
+		end
+	end
+)
+page.CreateSwitch("No A90",
+	function(bool)
+		if game:GetService("Players").LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.RemoteListener.Modules:FindFirstChild("A90") and bool then
+			game:GetService("Players").LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.RemoteListener.Modules.A90.Name = "Not A90"
+		elseif game:GetService("Players").LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.RemoteListener.Modules:FindFirstChild("Not A90") and not bool then
+			game:GetService("Players").LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.RemoteListener.Modules["Not A90"].Name = "A90"
 		end
 	end
 )
 page.CreateSwitch("No screech",
 	function(bool)
-		for i,v in pairs(plr:GetDescendants()) do
-			if v then
-				if bool and v.Name == "Screech" then
-					v.Name = "Not screech"
-				elseif not bool and v.Name == "Not Screech" then
-					v.Name = "Screech"
-				end
-			end
+		if game:GetService("Players").LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.RemoteListener.Modules:FindFirstChild("Screech") and bool then
+			game:GetService("Players").LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.RemoteListener.Modules.Name = "Not Screech"
+		elseif game:GetService("Players").LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.RemoteListener.Modules:FindFirstChild("Not Screech") and not bool then
+			game:GetService("Players").LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.RemoteListener.Modules["Not Screech"].Name = "Screech"
 		end
 	end
 )
@@ -1207,27 +1224,16 @@ connectedFunctions[#connectedFunctions+1] = game.Lighting.Changed:Connect(functi
 	end
 end)
 local page = pagelist.CreatePage("Anticheat")
-page.CreateLabel("In 'character' page we have god-mode function. It also bypassing anti-noclip")
-page.CreateButton("Bypass anticheat",
-	function()
-		if not bypassedAC then
-			game:GetService("Players").LocalPlayer.PlayerGui.MainUI.ItemShop.Visible = false
-			require(game:GetService("Players").LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).freemouse = false
-			novoid.Visible = false
-			if game:GetService("ReplicatedStorage").ClientModules.EntityModules:FindFirstChild("Void") then
-				game:GetService("ReplicatedStorage").ClientModules.EntityModules.Void.Name = "Not Void"
-			end
-			_G.BAC123FireDoors = true
-			bypassedAC = _G.BAC123FireDoors
-			ex1.Visible = false
-			ex2.Visible = true
-		end
-	end
-)
-page.CreateLabel("!Bypass anticheat works only in starting elevator at item shop menu!")
-page.CreateSwitch("Speed bypass",
+page.CreateSwitch("Bypass Anticheat",
 	function(bool)
 		bools.SpeedBypass = bool
+		ex1.Visible = not bool
+		ex2.Visible = bool
+		if bool then
+			collision.Position = collision.Position - Vector3.new(0,7.275,0)
+		else
+			collision.Position = collision.Position + Vector3.new(0,7.275,0)
+		end
 	end
 )
 local page = pagelist.CreatePage("Trolling")
@@ -1330,9 +1336,9 @@ coroutine.wrap(function()
 	while not closed do
 		if bools.SpeedBypass then
 			collision.Massless = true
-			wait(0.21)
+			wait(0.2)
 			collision.Massless = false
-			wait(0.27)
+			wait(0.28)
 		else
 			collision.Massless = false
 			rs(1)
