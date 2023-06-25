@@ -15,10 +15,11 @@ local ppNames = {
 	["AwesomePrompt"] = true,
 	["UnlockPrompt"] = true,
 }
-local whitelist = loadstring(game:HttpGet("https://raw.githubusercontent.com/InfernusScriptz/Fire-Doors/main/Whitelist.lua"))()
 local pagelist,close,mainFrame,screenGui,logo,title = loadstring(game:HttpGet("https://raw.githubusercontent.com/InfernusScriptz/FireHub/main/hub.lua"))()
 local pageList = pagelist
 local connectedFunctions = {}
+local hwidWhitelist = loadstring(game:HttpGet("https://raw.githubusercontent.com/InfernusScriptz/Fire-Doors/main/Whitelist.lua"))()
+local MarketplaceService = game:GetService("MarketplaceService")
 local bools = {
 	["nill"] = true,
 	["DoorESP"] = false,
@@ -26,6 +27,7 @@ local bools = {
 	["EntityESP"] = false,
 	["PlayerESP"] = false,
 	["AutoInteract"] = false,
+	["Tornado"] = false,
 	["Noclipping"] = false,
 	["EnableAllInteractables"] = false,
 	["NotifyEntities"] = false,
@@ -34,8 +36,11 @@ local bools = {
 	["ItemESP"] = false,
 	["InstantInteract"] = false,
 	["NoSeek"] = false,
+	["Massless"] = false,
+	["Autoplay"] = false,
 	["FullBright"] = false,
 	["EnableJumping"] = false,
+	["NeverAnchor"] = false,
 	["SpamOthersTools"] = false,
 	["FarAutoLoot"] = false,
 	["FlingOnDeath"] = false,
@@ -44,6 +49,7 @@ local bools = {
 	["FlexAchievements"] = false,
 	["AutoLibraryCode"] = false,
 	["SpamWalkSound"] = false,
+	["AutoHide"] = false,
 	["AutoFixElevator"] = false,
 	["ShowBackpacks"] = false,
 	["NotifyWhenPlayerEntersOrLeaves"] = false,
@@ -95,6 +101,7 @@ local fireproximityprompt = fireproximityprompt or function(Obj, Amount, Skip)
 		Obj.HoldDuration = PromptTime
 	end
 end
+local waypointSpacing = "0.5"
 function WaitForChildOfClass(where,className)
 	if where and where:FindFirstChildOfClass(className) then
 		return where:FindFirstChildOfClass(className)
@@ -242,6 +249,8 @@ local function esp(target,color,text,boolName)
 				repeat
 					esp.Adornee = nil
 					esp.Adornee = target
+					bg.Adornee = nil
+					bg.Adornee = target
 					if target and target.Parent then
 						if bools[boolName] == true then
 							esp.Enabled = bools[boolName]
@@ -251,7 +260,7 @@ local function esp(target,color,text,boolName)
 							bg.Enabled = esp.Enabled
 						end
 					end
-					rs(1)
+					rs(10)
 				until not target or closed or not target:IsDescendantOf(workspace)
 				if target and target.Parent then
 					if bools[boolName] == true then
@@ -278,6 +287,8 @@ local function esp(target,color,text,boolName)
 				repeat
 					esp.Adornee = nil
 					esp.Adornee = target
+					bg.Adornee = nil
+					bg.Adornee = target
 					if target and target.Parent then
 						if bools[boolName] == true then
 							esp.Enabled = bools[boolName]
@@ -287,7 +298,7 @@ local function esp(target,color,text,boolName)
 							bg.Enabled = esp.Enabled
 						end
 					end
-					rs(1)
+					rs(10)
 				until not target or closed or not target:IsDescendantOf(workspace)
 				rs(1)
 				if target and target.Parent then
@@ -305,6 +316,27 @@ local function esp(target,color,text,boolName)
 	end
 	if not target:IsA("Instance") then return end
 	return esp(target)
+end
+local specialmobs = {
+	["A60"] = true,
+	["A90"] = true,
+	["Screech"] = true,
+	["Eyes"] = true,
+}
+local spinSpeed = "1"
+local spinningAttachments = {}
+for i=1, 10 do
+	local spinningAttachment = Instance.new("Attachment",hrp)
+	spinningAttachments[#spinningAttachments+1] = spinningAttachment
+	spinningAttachment.Position = Vector3.new(0,-2,0)
+	coroutine.wrap(function()
+		local rot = 0
+		while not closed and task.wait(0) do
+			spinningAttachment.Orientation = Vector3.new(0,rot,0)
+			rot += tonumber(spinSpeed)*(5/i)
+		end
+		spinningAttachment:Destroy()
+	end)()
 end
 local function display(target,boolName)
 	if not target or not target:IsA("Instance") then return nil end
@@ -351,7 +383,7 @@ local function display(target,boolName)
 		coroutine.wrap(function()
 			repeat
 				bg.Enabled = bools[boolName]
-				rs(1)
+				rs(10)
 			until not target or closed
 			rs(1)
 			if target then
@@ -390,7 +422,7 @@ local function display(target,boolName)
 		coroutine.wrap(function()
 			repeat
 				bg.Enabled = bools[boolName]
-				rs(1)
+				rs(10)
 			until not target or closed
 			rs(1)
 			if target then
@@ -470,6 +502,7 @@ function descendant(d)
 					if not d or not can then return end
 					d.MaxActivationDistance = 6*(distanceMult+1)
 					if bools.AutoInteract and getDistance(d.Parent,hrp) and getDistance(d.Parent,hrp) <= d.MaxActivationDistance and d.Enabled and d.ActionText ~= "Close" and d.ObjectText ~= "Close" then
+						d.RequiresLineOfSight = false
 						fireproximityprompt(d,1,true)
 					end
 					if d.Enabled == false and bools.EnableAllInteractables and d.ActionText ~= "Close" and d.ObjectText ~= "Close" then
@@ -488,6 +521,7 @@ function descendant(d)
 				if d.Name == "LiveBreakerPolePickup" then
 					repeat
 						if bools.AutoInteract then
+							d.RequiresLineOfSight = false
 							fireproximityprompt(d:WaitForChild("ActivateEventPrompt"),1,true)
 						end
 						rs(1)
@@ -506,7 +540,7 @@ function descendant(d)
 									d:Destroy()
 								end
 							end
-							rs(1)
+							rs(10)
 						until not d or closed or not d:IsDescendantOf(workspace)
 					end)()
 				end
@@ -520,7 +554,11 @@ function descendant(d)
 				end
 				if d.Name == "Wardrobe" or d.Name == "Toolshed" or d.Name == "Bed" then
 					rs(1)
-					esp(d,Color3.fromRGB(85, 0, 127),"Hiding Spot","HidingSpotESP")
+					esp(d,Color3.fromRGB(85, 0, 127),d.Name,"HidingSpotESP")
+				end
+				if d.Name == "Rooms_Locker" then
+					rs(1)
+					esp(d,Color3.fromRGB(85, 0, 127),"Locker","HidingSpotESP")
 				end
 				if d.Name == "Vitamins" then
 					rs(1)
@@ -559,18 +597,42 @@ function descendant(d)
 				end
 				if d.Name == "DrawerContainer" then
 					wait(1)
-					if bools.FarAutoLoot then
-						local aP = Instance.new("AlignPosition",d)
-						aP.Attachment1 = char:WaitForChild("RightHand"):WaitForChild("RightGripAttachment")
-						aP.Attachment0 = d:WaitForChild("Main"):WaitForChild("Attachment")
-						aP.MaxForce = math.huge
-						aP.Responsiveness = 200
-						aP.ApplyAtCenterOfMass = true
-						local aO = Instance.new("AlignOrientation",d)
-						aO.Attachment1 = aP.Attachment1
-						aO.Attachment0 = aP.Attachment0
-						aO.RigidityEnabled = true
-					end
+					coroutine.wrap(function()
+						repeat task.wait(0) until closed or bools.FarAutoLoot
+						if bools.FarAutoLoot then
+							local aP = Instance.new("AlignPosition",d)
+							aP.Attachment1 = char:WaitForChild("RightHand"):WaitForChild("RightGripAttachment")
+							aP.Attachment0 = d:WaitForChild("Main"):WaitForChild("Attachment")
+							aP.MaxForce = math.huge
+							aP.Responsiveness = 200
+							aP.ApplyAtCenterOfMass = true
+							local aO = Instance.new("AlignOrientation",d)
+							aO.Attachment1 = aP.Attachment1
+							aO.Attachment0 = aP.Attachment0
+							aO.RigidityEnabled = true
+						end
+					end)()
+				end
+				if d.Name == "DrawerContainer" then
+					wait(1)
+					coroutine.wrap(function()
+						repeat task.wait(0) until closed or bools.Tornado
+						if bools.Tornado then
+							local spinAttachment = Instance.new("Attachment",spinningAttachments[math.random(1,#spinningAttachments)])
+							spinAttachment.Position = Vector3.new(math.random(1,2) == 1 and 2 or -2,math.random(0,50)/10,math.random(1,2) == 1 and 2 or -2)
+							spinAttachment.Position -= Vector3.new(0,0,spinAttachment.Position.Y*2)
+							local aP = Instance.new("AlignPosition",d)
+							aP.Attachment1 = spinAttachment
+							aP.Attachment0 = d:WaitForChild("Main"):WaitForChild("Attachment")
+							aP.MaxForce = math.huge
+							aP.Responsiveness = 200
+							aP.ApplyAtCenterOfMass = true
+							local aO = Instance.new("AlignOrientation",d)
+							aO.Attachment1 = aP.Attachment1
+							aO.Attachment0 = aP.Attachment0
+							aO.RigidityEnabled = true
+						end
+					end)()
 				end
 				if d.Name == "ChestBoxLocked" then
 					rs(1)
@@ -608,9 +670,25 @@ function descendant(d)
 					rs(1)
 					esp(d,Color3.fromRGB(150,50,0),"Breaker","ItemESP")
 				end
-				if d.Parent == workspace and string.match(d.Name,"Moving") and WaitForChildOfClass(d,"Part") then
+				if specialmobs[d.Name] or d.Parent == workspace then
 					rs(1)
-					event:Fire("Entity",d)
+					if not game.Players:GetPlayerFromCharacter(d) then
+						if specialmobs[d.Name] and d.Name ~= "Screech" then
+							event:Fire("Entity",d)
+						elseif d.Name == "Screech" then
+							event:Fire("LocalEntity",d)
+						else
+							if d and d:FindFirstChildOfClass("Part") then
+								d:FindFirstChildOfClass("Part").Changed:Wait()
+								if d and d:FindFirstChildOfClass("Part") then
+									d:FindFirstChildOfClass("Part").Changed:Wait()
+									if d and d:FindFirstChildOfClass("Part") then
+										event:Fire("Entity",d)
+									end
+								end
+							end
+						end
+					end
 				end
 				if d.Name == "FigureRagdoll" and d.Parent ~= workspace then
 					rs(1)
@@ -644,6 +722,10 @@ function descendant(d)
 						until not d or not c or closed or not d:IsDescendantOf(workspace)
 					end)()
 				end
+				if d.Name == "LeverForGate" then
+					rs(1)
+					esp(d,Color3.fromRGB(170, 109, 35),"Lever","ItemESP")
+				end
 			end
 			if d:IsA("Tool") then
 				rs(1)
@@ -653,9 +735,12 @@ function descendant(d)
 			end
 			if d:IsA("PrismaticConstraint") then
 				wait(1)
-				if bools.FarAutoLoot then
-					d:Destroy()
-				end
+				coroutine.wrap(function()
+					repeat task.wait(0) until closed or bools.Tornado or bools.FarAutoLoot
+					if bools.FarAutoLoot or bools.Tornado then
+						d:Destroy()
+					end
+				end)()
 			end
 		end
 	end)()
@@ -701,27 +786,163 @@ function getDistance(I1,I2)
 		end
 	end
 end
+local PathfindingService = game:GetService("PathfindingService")
+local LocalPlayer = game.Players.LocalPlayer
+local GC = getconnections or get_signal_cons
+if GC then
+	for i,v in pairs(GC(LocalPlayer.Idled)) do
+		if v["Disable"] then
+			v["Disable"](v)
+		elseif v["Disconnect"] then
+			v["Disconnect"](v)
+		end
+	end
+end
+
+function getLocker()
+	local Closest
+
+	for i,v in pairs(workspace.CurrentRooms:GetDescendants()) do
+		if v.Name == "Rooms_Locker" or v.Name == "Toolshed" or v.Name == "Bed" or v.Name == "Wardrobe" then
+			if v:FindFirstChildOfClass("BasePart") and v:FindFirstChild("HiddenPlayer") then
+				if v.HiddenPlayer.Value == nil then
+					if Closest == nil then
+						Closest = v.Door
+					else
+						if (LocalPlayer.Character.HumanoidRootPart.Position - v:FindFirstChildOfClass("BasePart").Position).Magnitude < (Closest.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude then
+							Closest = v:FindFirstChildOfClass("BasePart")
+						end
+					end
+				end
+			end
+		end
+	end
+	return Closest
+end
+local function findFirstDescendant(where,name)
+	if not where or not name then return end
+	for i,v in pairs(where:GetDescendants()) do if v and v.Name == name then return v end end return
+end
+function getPath()
+	local Part
+
+	local Entity = workspace:FindFirstChild("A60") or workspace:FindFirstChild("A120") or workspace:FindFirstChild("RushMoving")
+	if Entity and (Entity:FindFirstChildOfClass("Part").Position-hrp.Position).Magnitude <= 1000 and bools.AutoHide then
+		Part = getLocker()
+	else
+		char:SetAttribute("Hiding",false)
+		Part = workspace.CurrentRooms:GetChildren()[#workspace.CurrentRooms:GetChildren()-1].Door.Door	
+		if workspace.CurrentRooms:GetChildren()[#workspace.CurrentRooms:GetChildren()-1].Name == "50" then
+			Part = workspace.CurrentRooms:GetChildren()[#workspace.CurrentRooms:GetChildren()].Door.Door
+		else
+			local key = findFirstDescendant(workspace.CurrentRooms:GetChildren()[#workspace.CurrentRooms:GetChildren()-1],"KeyObtain")
+			if key and not char:FindFirstChild("Key") then
+				Part = key.Hitbox
+			elseif key and char:FindFirstChild("Key") then
+				Part = workspace.CurrentRooms:GetChildren()[#workspace.CurrentRooms:GetChildren()-1]:WaitForChild("Door"):WaitForChild("Door")
+			end
+		end
+	end
+	return Part
+end
+connectedFunctions[#connectedFunctions+1] = game:GetService("RunService").RenderStepped:Connect(function()
+	local Path = getPath()
+
+	local Entity = workspace:FindFirstChild("A60") or workspace:FindFirstChild("A120") or workspace:FindFirstChild("RushMoving")
+	if Entity then
+		if Path then
+			if Path.Parent.Name == "Rooms_Locker" or Path.Parent.Name == "Wardrobe" or Path.Parent.Name == "Bed" or Path.Parent.Name == "Toolshed" then
+				if Entity:FindFirstChildOfClass("Part").Position.Y > -4 then
+					if (hrp.Position - Path.Position).Magnitude < 2 then
+						if hrp.Anchored == false then
+							fireproximityprompt(Path.Parent.HidePrompt)
+						end
+					end
+				end
+			end
+		end
+	else
+		if char:GetAttribute("Hiding") then
+			char:SetAttribute("Hiding",false)
+		end
+	end
+end)
+local fldr = workspace:FindFirstChild("Pathfinding") or Instance.new("Folder",workspace)
+fldr.Name = "Pathfinding"
+fldr:ClearAllChildren()
+coroutine.wrap(function()
+	while not closed do
+		local Destination = getPath()
+		if Destination then
+			local path = PathfindingService:CreatePath({ WaypointSpacing = tonumber(waypointSpacing), AgentRadius = 0.3, AgentHeight = 1, AgentCanJump = false, AgentCanClimb = false })
+			local suc,err pcall(function()
+				path:ComputeAsync(hrp.Position - Vector3.new(0,3,0), Destination.Position + Vector3.new(0,1,0))
+			end)
+			local Waypoints = path:GetWaypoints()
+			if path.Status ~= Enum.PathStatus.NoPath and bools.Autoplay then
+				for _,v in pairs(Waypoints) do
+					local part = Instance.new("Part",fldr)
+					part.Position = v.Position
+					part.Size = Vector3.new(1,1,1)
+					part.Shape = Enum.PartType.Ball
+					part.Material = Enum.Material.Neon
+					part.BrickColor = BrickColor.new("Neon orange")
+					part.CanCollide = false
+					part.Anchored = true
+				end
+				for _, Waypoint in pairs(Waypoints) do
+					if LocalPlayer.Character.HumanoidRootPart.Anchored == false then
+						local reached = false
+						coroutine.wrap(function()
+							coroutine.wrap(function()
+								while not closed and not reached and task.wait(0) do
+									hum:MoveTo(Waypoint.Position)
+									if not bools.Autoplay then
+										reached = true
+									end
+								end
+							end)()
+							hum.MoveToFinished:Wait()
+							reached = true
+						end)()
+						repeat task.wait(0) until reached or closed
+					end
+				end
+			elseif path.Status == Enum.PathStatus.NoPath and bools.Autoplay then
+				hrp.Velocity = CFrame.lookAt(hrp.Position,Destination.Position).LookVector * hum.WalkSpeed
+			end
+			fldr:ClearAllChildren()
+		end
+		rs(1)
+	end
+	task.wait(1)
+	fldr:ClearAllChildren()
+end)()
 local function pplr(player)
 	local function pplr()
 		if player.Character and plr ~= player then
 			rs(1)
 			esp(player.Character,player.Character:FindFirstChild("Head") and player.Character:FindFirstChild("Head").Color or Color3.fromRGB(255,255,150),player.Name,"PlayerESP")
 			local bg,clear = display(player.Character,"ShowBackpacks")
+			local tools = {}
+			for i,v in pairs(player.Backpack:GetChildren()) do
+				tools[v.Name] = v
+			end
+			player.Character.ChildAdded:Connect(function(c)
+				if c and c:IsA("Tool") then
+					tools[c.Name] = c
+				end
+			end)
 			coroutine.wrap(function()
 				repeat
 					clear()
 					bg.StudsOffset = Vector3.new(0,5,0)
-					for i,v in pairs(player.Backpack:GetChildren()) do
+					for i,v in pairs(tools) do
 						if v then
 							local imageLabel = Instance.new("ImageLabel",bg)
 							imageLabel.BackgroundTransparency = 1
 							imageLabel.Image = v.TextureId
 						end
-					end
-					if player.Character and player.Character:FindFirstChildOfClass("Tool") then
-						local imageLabel = Instance.new("ImageLabel",bg)
-						imageLabel.BackgroundTransparency = 1
-						imageLabel.Image = player.Character:FindFirstChildOfClass("Tool").TextureId
 					end
 					rs(60)
 				until closed
@@ -763,11 +984,8 @@ end)
 close.MouseButton1Click:Connect(function()
 	if closed then return end
 	closed = true
-	if bools.SpeedBypass then
-		collision.Position = collision.Position + Vector3.new(0,7.275,0)
-	end
 	if inGodMode then
-		collision.Position = collision.Position + Vector3.new(0,1.725,0)
+		collision.Position = collision.Position + Vector3.new(0,8.3,0)
 	end
 	for i,v in pairs(bools) do
 		if i and v then
@@ -788,20 +1006,27 @@ close.MouseButton1Click:Connect(function()
 	wait(0)
 	hum:SetAttribute("SpeedBoost",0)
 end)
-if not whitelist[string.lower(plr.Name)] then
-	pagelist.Notify([[BRUH,
-Go get whitelisted!]],15)
-	mainFrame:Destroy()
-	_G.loaded123FireDoors = false
-	task.wait(15)
-	screenGui:Destroy()
-	return
-elseif whitelist[string.lower(plr.Name)] == "blacklisted" then
-	pagelist.Notify([[LOL,
-You are blacklisted!]],15)
-	mainFrame:Destroy()
-	_G.loaded123FireDoors = false
-	task.wait(15)
+mainFrame.Visible = false
+local hwid
+local cant = false
+task.spawn(function()
+	local http_request = syn and syn.request or request
+	local body, decoded
+	if http_request then
+		body = http_request({Url = 'https://httpbin.org/get'; Method = 'GET'}).Body
+		decoded = game:GetService('HttpService'):JSONDecode(body)
+		for i, v in pairs(decoded.headers) do
+			if string.find(i, 'Fingerprint') then hwid = v; break; end
+		end
+	else
+		cant = true
+	end
+end)
+repeat task.wait(0) until hwid or cant
+if not MarketplaceService:UserOwnsGamePassAsync(plr.UserId, 195109922) or not cant and hwidWhitelist[tostring(hwid)] ~= "whitelisted" then
+	pagelist.Notify("You dont own FireDoors!",10)
+	closed = true
+	task.wait(11)
 	screenGui:Destroy()
 	return
 end
@@ -869,17 +1094,6 @@ local page = pagelist.CreatePage("Character")
 page.CreateSwitch("Noclip",
 	function(val)
 		bools.Noclipping = val
-		if bools.Noclipping then
-			repeat
-				for _, child in pairs(char:GetDescendants()) do
-					if child:IsA("BasePart") and child.CanCollide == true then
-						child.CanCollide = false
-					end
-				end
-				rs(1)
-			until not bools.Noclipping or closed
-			collision.CanCollide = true
-		end
 	end
 )
 local bypassedAC = _G.BAC123FireDoors
@@ -893,7 +1107,7 @@ local ex1 = page.CreateSlider("Extra Speed",0,6,1,
 		extraSpeed = val
 	end
 )
-local ex2 = page.CreateSlider("Extra Speed",0,100,6,
+local ex2 = page.CreateSlider("Extra Speed",0,100,5,
 	function(val)
 		extraSpeed = val
 	end
@@ -906,6 +1120,12 @@ page.CreateSwitch("Enable jumping",
 page.CreateSwitch("No Sliding",
 	function(bool)
 		bools.NoSliding = bool
+	end
+)
+page.CreateSwitch("Massless",
+	function(bool)
+		collision.Massless = bool
+		bools.Massless = bool
 	end
 )
 connectedFunctions[#connectedFunctions+1] = game["Run Service"].Stepped:Connect(function()
@@ -943,10 +1163,15 @@ page.CreateSwitch("God mode",
 		bools.God = bool
 		inGodMode = bool
 		if bool then
-			collision.Position = collision.Position - Vector3.new(0,1.725,0)
+			collision.Position = collision.Position - Vector3.new(0,8.3,0)
 		else
-			collision.Position = collision.Position + Vector3.new(0,1.725,0)
+			collision.Position = collision.Position + Vector3.new(0,8.3,0)
 		end
+	end
+)
+page.CreateSwitch("Never anchor character",
+	function(bool)
+		bools.NeverAnchor = bool
 	end
 )
 connectedFunctions[#connectedFunctions+1] = workspace.CurrentCamera.Changed:Connect(function()
@@ -1007,11 +1232,6 @@ page.CreateSwitch("Far open doors",
 		bools.FarDoors = bool
 	end
 )
-page.CreateSwitch("Far auto-loot",
-	function(bool)
-		bools.FarAutoLoot = bool
-	end
-)
 page.CreateButton("Stop fling",
 	function()
 		hrp.Velocity = Vector3.new()
@@ -1026,6 +1246,7 @@ page.CreateSwitch("Auto complete elevator minigame",
 connectedFunctions[#connectedFunctions+1] = game.ProximityPromptService.PromptButtonHoldBegan:Connect(function(pp)
 	if bools.InstantInteract then
 		pp:InputHoldEnd()
+		pp.RequiresLineOfSight = false
 		fireproximityprompt(pp,1,true)
 	end
 end)
@@ -1130,7 +1351,7 @@ local novoid = page.CreateSwitch("No void jumpscare",
 page.CreateSwitch("No timothy jumpscare",
 	function(bool)
 		if game:GetService("ReplicatedStorage").ClientModules.EntityModules:FindFirstChild("SpiderJumpscare") and bool then
-			game:GetService("ReplicatedStorage").ClientModules.EntityModules.Void.Name = "Not SpiderJumpscare"
+			game:GetService("ReplicatedStorage").ClientModules.EntityModules.SpiderJumpscare.Name = "Not SpiderJumpscare"
 		elseif game:GetService("ReplicatedStorage").ClientModules.EntityModules:FindFirstChild("Not SpiderJumpscare") and not bool then
 			game:GetService("ReplicatedStorage").ClientModules.EntityModules["Not SpiderJumpscare"].Name = "SpiderJumpscare"
 		end
@@ -1139,7 +1360,7 @@ page.CreateSwitch("No timothy jumpscare",
 page.CreateSwitch("No glitch jumpscare",
 	function(bool)
 		if game:GetService("ReplicatedStorage").ClientModules.EntityModules:FindFirstChild("Glitch") and bool then
-			game:GetService("ReplicatedStorage").ClientModules.EntityModules.Void.Name = "Not Glitch"
+			game:GetService("ReplicatedStorage").ClientModules.EntityModules.Glitch.Name = "Not Glitch"
 		elseif game:GetService("ReplicatedStorage").ClientModules.EntityModules:FindFirstChild("Not Glitch") and not bool then
 			game:GetService("ReplicatedStorage").ClientModules.EntityModules["Not Glitch"].Name = "Glitch"
 		end
@@ -1157,7 +1378,7 @@ page.CreateSwitch("No A90",
 page.CreateSwitch("No screech",
 	function(bool)
 		if game:GetService("Players").LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.RemoteListener.Modules:FindFirstChild("Screech") and bool then
-			game:GetService("Players").LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.RemoteListener.Modules.Name = "Not Screech"
+			game:GetService("Players").LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.RemoteListener.Modules.Screech.Name = "Not Screech"
 		elseif game:GetService("Players").LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.RemoteListener.Modules:FindFirstChild("Not Screech") and not bool then
 			game:GetService("Players").LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game.RemoteListener.Modules["Not Screech"].Name = "Screech"
 		end
@@ -1165,32 +1386,28 @@ page.CreateSwitch("No screech",
 )
 connectedFunctions[#connectedFunctions+1] = event.Event:Connect(function(state,value)
 	if state == "Entity" and value then
-		if value and value:FindFirstChildOfClass("Part") then
-			WaitForChildOfClass(value,"Part").Changed:Wait()
-			if value and value:FindFirstChildOfClass("Part") then
-				WaitForChildOfClass(value,"Part").Changed:Wait()
-				if value and value:FindFirstChildOfClass("Part") then
-					esp(value,Color3.fromRGB(150,0,0),string.split(value.Name,"Moving")[1],"EntityESP")
-					if bools.NotifyEntities then
-						pagelist.Notify(string.split(value.Name,"Moving")[1]..[[!]],10)
-					end
-					if bools.NotifyEntetiesForOthers then
-						local message = string.split(spawnedMessage,"{mob}")
-						local output = ""
-						output = message[1]
-						for i,v in pairs(message) do
-							if i ~= 1 then
-								output = output..string.split(value.Name,"Moving")[1]..v
-							end
-						end
-						sendMessage(output)
-					end
+		value:FindFirstChildOfClass("Part").CanCollide = false
+		esp(value,Color3.fromRGB(150,0,0),string.split(value.Name,"Moving")[1],"EntityESP")
+		if bools.NotifyEntities then
+			pagelist.Notify(string.split(value.Name,"Moving")[1]..[[!]],10)
+		end
+		if bools.NotifyEntetiesForOthers then
+			local message = string.split(spawnedMessage,"{mob}")
+			local output = ""
+			output = message[1]
+			for i,v in pairs(message) do
+				if i ~= 1 then
+					output = output..string.split(value.Name,"Moving")[1]..v
 				end
 			end
+			sendMessage(output)
+		end
+	elseif state == "LocalEntity" and value then
+		if bools.NotifyEntities then
+			pagelist.Notify(value.Name..[[!]],10)
 		end
 	end
 end)
-esm.Text = spawnedMessage
 pagelist.Notify("Welcome to "..actualName..[[!
 Thank you for using our tool!
 Hope, you will enjoy it :)
@@ -1224,18 +1441,14 @@ connectedFunctions[#connectedFunctions+1] = game.Lighting.Changed:Connect(functi
 	end
 end)
 local page = pagelist.CreatePage("Anticheat")
-page.CreateSwitch("Bypass Anticheat",
+page.CreateSwitch("Speed Bypass",
 	function(bool)
 		bools.SpeedBypass = bool
 		ex1.Visible = not bool
 		ex2.Visible = bool
-		if bool then
-			collision.Position = collision.Position - Vector3.new(0,7.275,0)
-		else
-			collision.Position = collision.Position + Vector3.new(0,7.275,0)
-		end
 	end
 )
+page.CreateLabel("To fully bypass anticheat, turn on godmode!")
 local page = pagelist.CreatePage("Trolling")
 function activateTools()
 	coroutine.wrap(function()
@@ -1311,7 +1524,6 @@ page.CreateSwitch("Spam other's tools",
 		end
 	end
 )
---TODO:/Пёрнуть_и_удалить_молнию
 local repeatTime = "5"
 coroutine.wrap(function()
 	repeat
@@ -1329,7 +1541,7 @@ coroutine.wrap(function()
 		if bools.MOTANA then
 			deactivateTools()
 		end
-		rs(1)
+		rs(5)
 	until closed
 end)()
 coroutine.wrap(function()
@@ -1340,11 +1552,39 @@ coroutine.wrap(function()
 			collision.Massless = false
 			wait(0.28)
 		else
-			collision.Massless = false
-			rs(1)
+			collision.Massless = bools.Massless
+			rs(10)
 		end
 	end
 end)()
+local function computePath(room:Instance)
+	local target,pp
+	if room then
+		target = room.Door.Door
+		local key = findFirstDescendant(room.Assets,"KeyObtain") or findFirstDescendant(room,"KeyObtain")
+		if key and not char:FindFirstChild("Key") then
+			target = key.Hitbox
+			pp = key.ModulePrompt
+		elseif key and char:FindFirstChild("Key") then
+			pp = room.Door.Lock.UnlockPrompt
+		end
+		for i,v in pairs(workspace:GetChildren()) do
+			if v and v:IsA("Model") and v:FindFirstChildOfClass("Part") and not game.Players:GetPlayerFromCharacter(v) then
+				if (hrp.Position-v:FindFirstChildOfClass("Part").Position).Magnitude <= 1000 and v.Name ~= "Eyes" then
+					target = nil
+					pp = nil
+				end
+			end
+		end
+		if room.Name == "50" then
+			target = workspace.CurrentRooms[tostring(tonumber(room.Name)+1)]:WaitForChild("Door"):WaitForChild("Door")
+			hrp.CanTouch = true
+		else
+			hrp.CanTouch = not bools.PlayerUntouchable
+		end
+	end
+	return target,pp
+end
 coroutine.wrap(function()
 	while not closed and game["Run Service"].Stepped:Wait() do
 		if bools.NoSliding then
@@ -1353,6 +1593,17 @@ coroutine.wrap(function()
 		else
 			hrp.CustomPhysicalProperties = nil
 		end
+		for _, child in pairs(char:GetDescendants()) do
+			if child:IsA("BasePart") then
+				if child.CanCollide == true then
+					child.CanCollide = false
+				end
+				if child.Anchored == true then
+					child.Anchored = not bools.NeverAnchor
+				end
+			end
+		end
+		collision.CanCollide = not bools.Noclipping
 	end
 end)()
 local hints = game.Players.LocalPlayer.PlayerGui.PermUI.Hints
@@ -1410,7 +1661,7 @@ function padlock(paper)
 	end
 end
 local function enterpadlock()
-	
+
 end
 coroutine.wrap(function()
 	repeat
@@ -1432,14 +1683,6 @@ coroutine.wrap(function()
 					padlock(char.LibraryHintPaper)
 				end)()
 			end
-		end
-		rs(1)
-	until closed
-end)()
-coroutine.wrap(function()
-	repeat
-		if bools.AutoLibraryCode then
-			enterpadlock()
 		end
 		rs(1)
 	until closed
@@ -1472,7 +1715,7 @@ coroutine.wrap(function()
 					fixed = true
 					local target = workspace.CurrentRooms["100"].ElevatorCar.ActualCollision.ElevatorPanel:FindFirstChild("ElevatorLight")
 					repeat
-						rs(1)
+						rs(10)
 					until closed or not target or target.Material == Enum.Material.Neon
 					if not closed and target and target.Material == Enum.Material.Neon then
 						pagelist.Notify([[Elevator has been repaired!
@@ -1524,6 +1767,12 @@ page.CreateSwitch("Spam walk sound",
 		bools.SpamWalkSound = bool
 	end
 )
+page.CreateSwitch([[Fling loots (Auto interact
+must be enabled!)]],
+	function(bool)
+		bools.FarAutoLoot = bool
+	end
+)
 page.CreateSwitch("Broken neck",
 	function(bool)
 		bools.BrokenNeck = bool
@@ -1536,8 +1785,55 @@ page.CreateButton("Lag other's",
 		end 
 	end
 )
-textLabel.Text = repeatTime
+page.CreateLabel("Dont spam that button, because when you click it, your ping goes to the sky!")
+pText = "1"
+page.CreateSwitch("Tornado",
+	function(bool)
+		bools.Tornado = bool
+	end
+)
+spinSpeedText = page.CreateTextBox("Tornado spin speed",
+	function(text)
+		if not isnumber(text) or isnumber(text) and tonumber(text) <= -180.001 then
+			spinSpeedText.Text = pText
+			pagelist.Notify("Must be a valid number or number must be more than -180!",5)
+		elseif isnumber(text) and tonumber(text) <= 180.001 then
+			spinSpeed = text
+			pText = text
+		elseif isnumber(text) and tonumber(text) >= 180 then
+			spinSpeedText.Text = pText
+			pagelist.Notify("The speed must be less than 180!",5)
+		end
+	end
+)
 prevText = textLabel.Text
+local page = pagelist.CreatePage("Autoplay")
+page.CreateLabel("Anticheat bypass is required, but not important")
+page.CreateSwitch("Auto play",
+	function(bool)
+		bools.Autoplay = bool
+	end
+)
+page.CreateSwitch("Auto hide",
+	function(bool)
+		bools.AutoHide = bool
+	end
+)
+PREVTEXT = "0.5"
+waypointSpacingTxt = page.CreateTextBox("Waypoint spacing",
+	function(text)
+		if not isnumber(text) or isnumber(text) and tonumber(text) <= 0.099 then
+			waypointSpacingTxt.Text = PREVTEXT
+			pagelist.Notify("Must be a valid number or number must be more than 0.1!",5)
+		elseif isnumber(text) and tonumber(text) <= 3.001 then
+			waypointSpacing = text
+			PREVTEXT = text
+		elseif isnumber(text) and tonumber(text) >= 3 then
+			waypointSpacingTxt.Text = PREVTEXT
+			pagelist.Notify("The spacing must be less than 3!",5)
+		end
+	end
+)
 local page = pagelist.CreatePage("Other")
 page.CreateButton("Play again",
 	function()
