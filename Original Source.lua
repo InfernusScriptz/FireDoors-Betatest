@@ -1033,18 +1033,19 @@ task.spawn(function()
 end)
 pagelist.Notify("Please wait, loading the script!",5)
 repeat task.wait(0) until _G.hwid or cant
-if not own or hwidWhitelist[_G.hwid] == nil and not own or hwidWhitelist[_G.hwid] == "blacklisted" and not own then
-	print(type(_G.hwid),not own)
-	if hwidWhitelist[_G.hwid] ~= "blacklisted" then
-		pagelist.Notify("You dont own FireDoors!",10)
-	else
-		pagelist.Notify("You are blacklisted!",10)
+if not own then
+	if hwidWhitelist[_G.hwid] == nil or hwidWhitelist[_G.hwid] == "blacklisted" then
+		if hwidWhitelist[_G.hwid] ~= "blacklisted" then
+			pagelist.Notify("You dont own FireDoors!",10)
+		else
+			pagelist.Notify("You are blacklisted!",10)
+		end
+		closed = true
+		_G.loaded123FireDoors = false
+		task.wait(11)
+		screenGui:Destroy()
+		return
 	end
-	closed = true
-	_G.loaded123FireDoors = false
-	task.wait(11)
-	screenGui:Destroy()
-	return
 end
 mainFrame.Visible = true
 local page = pageList.CreatePage("Main")
