@@ -6,6 +6,10 @@ _G.fullName = fullName
 _G.actualName = actualName
 local logoImage = "http://www.roblox.com/asset/?id=876744268"
 _G.logoImage = logoImage
+local floor = game:GetService("ReplicatedStorage").GameData.Floor.Value
+if floor == "Hotel" and #workspace.Lobby:GetChildren() ~= 0 then
+	floor = "Lobby"
+end
 local ppNames = {
 	["ModulePrompt"] = true,
 	["ActivateEventPrompt"] = true,
@@ -871,49 +875,51 @@ local fldr = workspace:FindFirstChild("Pathfinding") or Instance.new("Folder",wo
 fldr.Name = "Pathfinding"
 fldr:ClearAllChildren()
 coroutine.wrap(function()
-	while not closed do
-		local Destination = getPath()
-		if Destination then
-			local path = PathfindingService:CreatePath({ WaypointSpacing = tonumber(waypointSpacing), AgentRadius = 0.3, AgentHeight = 1, AgentCanJump = false, AgentCanClimb = false })
-			local suc,err pcall(function()
-				path:ComputeAsync(hrp.Position - Vector3.new(0,3,0), Destination.Position + Vector3.new(0,1,0))
-			end)
-			local Waypoints = path:GetWaypoints()
-			if path.Status ~= Enum.PathStatus.NoPath and bools.Autoplay then
-				for _,v in pairs(Waypoints) do
-					local part = Instance.new("Part",fldr)
-					part.Position = v.Position
-					part.Size = Vector3.new(1,1,1)
-					part.Shape = Enum.PartType.Ball
-					part.Material = Enum.Material.Neon
-					part.BrickColor = BrickColor.new("Neon orange")
-					part.CanCollide = false
-					part.Anchored = true
-				end
-				for _, Waypoint in pairs(Waypoints) do
-					if LocalPlayer.Character.HumanoidRootPart.Anchored == false then
-						local reached = false
-						coroutine.wrap(function()
-							coroutine.wrap(function()
-								while not closed and not reached and task.wait(0) do
-									hum:MoveTo(Waypoint.Position)
-									if not bools.Autoplay then
-										reached = true
-									end
-								end
-							end)()
-							hum.MoveToFinished:Wait()
-							reached = true
-						end)()
-						repeat task.wait(0) until reached or closed
+	if floor ~= "Lobby" then
+		while not closed do
+			local Destination = getPath()
+			if Destination then
+				local path = PathfindingService:CreatePath({ WaypointSpacing = tonumber(waypointSpacing), AgentRadius = 0.3, AgentHeight = 1, AgentCanJump = false, AgentCanClimb = false })
+				local suc,err pcall(function()
+					path:ComputeAsync(hrp.Position - Vector3.new(0,3,0), Destination.Position + Vector3.new(0,1,0))
+				end)
+				local Waypoints = path:GetWaypoints()
+				if path.Status ~= Enum.PathStatus.NoPath and bools.Autoplay then
+					for _,v in pairs(Waypoints) do
+						local part = Instance.new("Part",fldr)
+						part.Position = v.Position
+						part.Size = Vector3.new(1,1,1)
+						part.Shape = Enum.PartType.Ball
+						part.Material = Enum.Material.Neon
+						part.BrickColor = BrickColor.new("Neon orange")
+						part.CanCollide = false
+						part.Anchored = true
 					end
+					for _, Waypoint in pairs(Waypoints) do
+						if LocalPlayer.Character.HumanoidRootPart.Anchored == false then
+							local reached = false
+							coroutine.wrap(function()
+								coroutine.wrap(function()
+									while not closed and not reached and task.wait(0) do
+										hum:MoveTo(Waypoint.Position)
+										if not bools.Autoplay then
+											reached = true
+										end
+									end
+								end)()
+								hum.MoveToFinished:Wait()
+								reached = true
+							end)()
+							repeat task.wait(0) until reached or closed
+						end
+					end
+				elseif path.Status == Enum.PathStatus.NoPath and bools.Autoplay then
+					hrp.Velocity = CFrame.lookAt(hrp.Position,Destination.Position).LookVector * hum.WalkSpeed
 				end
-			elseif path.Status == Enum.PathStatus.NoPath and bools.Autoplay then
-				hrp.Velocity = CFrame.lookAt(hrp.Position,Destination.Position).LookVector * hum.WalkSpeed
+				fldr:ClearAllChildren()
 			end
-			fldr:ClearAllChildren()
+			rs(1)
 		end
-		rs(1)
 	end
 	task.wait(1)
 	fldr:ClearAllChildren()
