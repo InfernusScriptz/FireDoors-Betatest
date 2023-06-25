@@ -18,6 +18,7 @@ local ppNames = {
 local pagelist,close,mainFrame,screenGui,logo,title = loadstring(game:HttpGet("https://raw.githubusercontent.com/InfernusScriptz/FireHub/main/hub.lua"))()
 local pageList = pagelist
 local connectedFunctions = {}
+local hwidWhitelist = loadstring(game:HttpGet("https://raw.githubusercontent.com/InfernusScriptz/Fire-Doors/main/Whitelist.lua"))()
 local MarketplaceService = game:GetService("MarketplaceService")
 local bools = {
 	["nill"] = true,
@@ -332,7 +333,7 @@ for i=1, 10 do
 		local rot = 0
 		while not closed and task.wait(0) do
 			spinningAttachment.Orientation = Vector3.new(0,rot,0)
-			rot = rot + tonumber(spinSpeed)*(5/i)
+			rot += tonumber(spinSpeed)*(5/i)
 		end
 		spinningAttachment:Destroy()
 	end)()
@@ -619,7 +620,7 @@ function descendant(d)
 						if bools.Tornado then
 							local spinAttachment = Instance.new("Attachment",spinningAttachments[math.random(1,#spinningAttachments)])
 							spinAttachment.Position = Vector3.new(math.random(1,2) == 1 and 2 or -2,math.random(0,50)/10,math.random(1,2) == 1 and 2 or -2)
-							spinAttachment.Position = spinAttachment.Position - Vector3.new(0,0,spinAttachment.Position.Y*2)
+							spinAttachment.Position -= Vector3.new(0,0,spinAttachment.Position.Y*2)
 							local aP = Instance.new("AlignPosition",d)
 							aP.Attachment1 = spinAttachment
 							aP.Attachment0 = d:WaitForChild("Main"):WaitForChild("Attachment")
@@ -1005,7 +1006,24 @@ close.MouseButton1Click:Connect(function()
 	wait(0)
 	hum:SetAttribute("SpeedBoost",0)
 end)
-if not MarketplaceService:UserOwnsGamePassAsync(plr.UserId, 195109922) then
+mainFrame.Visible = false
+local hwid
+local cant = false
+task.spawn(function()
+	local http_request = syn and syn.request or request
+	local body, decoded
+	if http_request then
+		body = http_request({Url = 'https://httpbin.org/get'; Method = 'GET'}).Body
+		decoded = game:GetService('HttpService'):JSONDecode(body)
+		for i, v in pairs(decoded.headers) do
+			if string.find(i, 'Fingerprint') then hwid = v; break; end
+		end
+	else
+		cant = true
+	end
+end)
+repeat task.wait(0) until hwid or cant
+if not MarketplaceService:UserOwnsGamePassAsync(plr.UserId, 195109922) or not cant and hwidWhitelist[tostring(hwid)] ~= "whitelisted" then
 	pagelist.Notify("You dont own FireDoors!",10)
 	closed = true
 	task.wait(11)
@@ -1596,7 +1614,7 @@ function padlock(paper)
 		local numbers = 0
 		for i,v in pairs(paper:GetChildren()) do
 			if v and v:IsA("ImageLabel") and isnumber(v.Name) then
-				numbers = numbers + tonumber(v.Name)
+				numbers += tonumber(v.Name)
 				v.Name = string.format("%02d",v.Name)
 			end
 		end
