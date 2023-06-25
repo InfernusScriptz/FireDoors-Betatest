@@ -7,7 +7,7 @@ _G.actualName = actualName
 local logoImage = "http://www.roblox.com/asset/?id=876744268"
 _G.logoImage = logoImage
 local floor = game:GetService("ReplicatedStorage").GameData.Floor.Value
-if floor == "Hotel" and #workspace.Lobby:GetChildren() ~= 0 then
+if floor == "Hotel" and workspace:FindFirstChild("Lobby") then
 	floor = "Lobby"
 end
 local ppNames = {
@@ -835,15 +835,18 @@ function getPath()
 		Part = getLocker()
 	else
 		char:SetAttribute("Hiding",false)
-		Part = workspace.CurrentRooms:GetChildren()[#workspace.CurrentRooms:GetChildren()-1].Door.Door	
-		if workspace.CurrentRooms:GetChildren()[#workspace.CurrentRooms:GetChildren()-1].Name == "50" then
-			Part = workspace.CurrentRooms:GetChildren()[#workspace.CurrentRooms:GetChildren()].Door.Door
-		else
-			local key = findFirstDescendant(workspace.CurrentRooms:GetChildren()[#workspace.CurrentRooms:GetChildren()-1],"KeyObtain")
-			if key and not char:FindFirstChild("Key") then
-				Part = key.Hitbox
-			elseif key and char:FindFirstChild("Key") then
-				Part = workspace.CurrentRooms:GetChildren()[#workspace.CurrentRooms:GetChildren()-1]:WaitForChild("Door"):WaitForChild("Door")
+		local room = workspace.CurrentRooms:GetChildren()[#workspace.CurrentRooms:GetChildren()-1]
+		if room then
+			Part = room:WaitForChild("Door"):WaitForChild("Door")	
+			if workspace.CurrentRooms:GetChildren()[#workspace.CurrentRooms:GetChildren()-1].Name == "50" then
+				Part = workspace.CurrentRooms:GetChildren()[#workspace.CurrentRooms:GetChildren()]:WaitForChild("Door"):WaitForChild("Door")	
+			else
+				local key = findFirstDescendant(workspace.CurrentRooms:GetChildren()[#workspace.CurrentRooms:GetChildren()-1],"KeyObtain")
+				if key and not char:FindFirstChild("Key") then
+					Part = key.Hitbox
+				elseif key and char:FindFirstChild("Key") then
+					Part = workspace.CurrentRooms:GetChildren()[#workspace.CurrentRooms:GetChildren()-1]:WaitForChild("Door"):WaitForChild("Door")
+				end
 			end
 		end
 	end
@@ -876,7 +879,7 @@ fldr.Name = "Pathfinding"
 fldr:ClearAllChildren()
 coroutine.wrap(function()
 	if floor ~= "Lobby" then
-		while not closed do
+		while not closed and floor ~= "Lobby" do
 			local Destination = getPath()
 			if Destination then
 				local path = PathfindingService:CreatePath({ WaypointSpacing = tonumber(waypointSpacing), AgentRadius = 0.3, AgentHeight = 1, AgentCanJump = false, AgentCanClimb = false })
@@ -957,7 +960,7 @@ local function pplr(player)
 	end
 	coroutine.wrap(function()
 		pplr()
-		connectedFunctions[#connectedFunctions+1] = player.CharacterAdded:Connect(function(character)
+		connectedFunctions[#connectedFunctions+1] = player.CharacterAppearanceLoaded:Connect(function(character)
 			pplr()
 		end)
 	end)()
@@ -1013,29 +1016,37 @@ close.MouseButton1Click:Connect(function()
 	hum:SetAttribute("SpeedBoost",0)
 end)
 mainFrame.Visible = false
-local hwid
 local cant = false
+local own = MarketplaceService:UserOwnsGamePassAsync(plr.UserId, 195109922)
 task.spawn(function()
 	local http_request = syn and syn.request or request
 	local body, decoded
-	if http_request then
+	if http_request and not _G.hwid then
 		body = http_request({Url = 'https://httpbin.org/get'; Method = 'GET'}).Body
 		decoded = game:GetService('HttpService'):JSONDecode(body)
 		for i, v in pairs(decoded.headers) do
-			if string.find(i, 'Fingerprint') then hwid = v; break; end
+			if string.find(i, 'Fingerprint') then _G.hwid = v; break; end
 		end
 	else
 		cant = true
 	end
 end)
-repeat task.wait(0) until hwid or cant
-if not MarketplaceService:UserOwnsGamePassAsync(plr.UserId, 195109922) or not cant and hwidWhitelist[tostring(hwid)] ~= "whitelisted" then
-	pagelist.Notify("You dont own FireDoors!",10)
+pagelist.Notify("Please wait, loading the script!",5)
+repeat task.wait(0) until _G.hwid or cant
+if not own or hwidWhitelist[_G.hwid] == nil and not own or hwidWhitelist[_G.hwid] == "blacklisted" and not own then
+	print(type(_G.hwid),not own)
+	if hwidWhitelist[_G.hwid] ~= "blacklisted" then
+		pagelist.Notify("You dont own FireDoors!",10)
+	else
+		pagelist.Notify("You are blacklisted!",10)
+	end
 	closed = true
+	_G.loaded123FireDoors = false
 	task.wait(11)
 	screenGui:Destroy()
 	return
 end
+mainFrame.Visible = true
 local page = pageList.CreatePage("Main")
 page.CreateLabel("Exclusive hub for "..fullName)
 page.CreateLabel("Hub updated [13.06.23] or [06.13.23]")
