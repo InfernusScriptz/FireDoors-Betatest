@@ -1575,34 +1575,6 @@ coroutine.wrap(function()
 		end
 	end
 end)()
-local function computePath(room:Instance)
-	local target,pp
-	if room then
-		target = room.Door.Door
-		local key = findFirstDescendant(room.Assets,"KeyObtain") or findFirstDescendant(room,"KeyObtain")
-		if key and not char:FindFirstChild("Key") then
-			target = key.Hitbox
-			pp = key.ModulePrompt
-		elseif key and char:FindFirstChild("Key") then
-			pp = room.Door.Lock.UnlockPrompt
-		end
-		for i,v in pairs(workspace:GetChildren()) do
-			if v and v:IsA("Model") and v:FindFirstChildOfClass("Part") and not game.Players:GetPlayerFromCharacter(v) then
-				if (hrp.Position-v:FindFirstChildOfClass("Part").Position).Magnitude <= 1000 and v.Name ~= "Eyes" then
-					target = nil
-					pp = nil
-				end
-			end
-		end
-		if room.Name == "50" then
-			target = workspace.CurrentRooms[tostring(tonumber(room.Name)+1)]:WaitForChild("Door"):WaitForChild("Door")
-			hrp.CanTouch = true
-		else
-			hrp.CanTouch = not bools.PlayerUntouchable
-		end
-	end
-	return target,pp
-end
 coroutine.wrap(function()
 	while not closed and game["Run Service"].Stepped:Wait() do
 		if bools.NoSliding then
