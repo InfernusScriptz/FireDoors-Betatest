@@ -6,6 +6,10 @@ _G.fullName = fullName
 _G.actualName = actualName
 local logoImage = "http://www.roblox.com/asset/?id=876744268"
 _G.logoImage = logoImage
+local floor = game:GetService("ReplicatedStorage").GameData.Floor.Value
+if floor == "Hotel" and workspace:FindFirstChild("Lobby") then
+	floor = "Lobby"
+end
 local ppNames = {
 	["ModulePrompt"] = true,
 	["ActivateEventPrompt"] = true,
@@ -831,15 +835,18 @@ function getPath()
 		Part = getLocker()
 	else
 		char:SetAttribute("Hiding",false)
-		Part = workspace.CurrentRooms:GetChildren()[#workspace.CurrentRooms:GetChildren()-1].Door.Door	
-		if workspace.CurrentRooms:GetChildren()[#workspace.CurrentRooms:GetChildren()-1].Name == "50" then
-			Part = workspace.CurrentRooms:GetChildren()[#workspace.CurrentRooms:GetChildren()].Door.Door
-		else
-			local key = findFirstDescendant(workspace.CurrentRooms:GetChildren()[#workspace.CurrentRooms:GetChildren()-1],"KeyObtain")
-			if key and not char:FindFirstChild("Key") then
-				Part = key.Hitbox
-			elseif key and char:FindFirstChild("Key") then
-				Part = workspace.CurrentRooms:GetChildren()[#workspace.CurrentRooms:GetChildren()-1]:WaitForChild("Door"):WaitForChild("Door")
+		local room = workspace.CurrentRooms:GetChildren()[#workspace.CurrentRooms:GetChildren()-1]
+		if room then
+			Part = room:WaitForChild("Door"):WaitForChild("Door")	
+			if workspace.CurrentRooms:GetChildren()[#workspace.CurrentRooms:GetChildren()-1].Name == "50" then
+				Part = workspace.CurrentRooms:GetChildren()[#workspace.CurrentRooms:GetChildren()]:WaitForChild("Door"):WaitForChild("Door")	
+			else
+				local key = findFirstDescendant(workspace.CurrentRooms:GetChildren()[#workspace.CurrentRooms:GetChildren()-1],"KeyObtain")
+				if key and not char:FindFirstChild("Key") then
+					Part = key.Hitbox
+				elseif key and char:FindFirstChild("Key") then
+					Part = workspace.CurrentRooms:GetChildren()[#workspace.CurrentRooms:GetChildren()-1]:WaitForChild("Door"):WaitForChild("Door")
+				end
 			end
 		end
 	end
@@ -871,49 +878,51 @@ local fldr = workspace:FindFirstChild("Pathfinding") or Instance.new("Folder",wo
 fldr.Name = "Pathfinding"
 fldr:ClearAllChildren()
 coroutine.wrap(function()
-	while not closed do
-		local Destination = getPath()
-		if Destination then
-			local path = PathfindingService:CreatePath({ WaypointSpacing = tonumber(waypointSpacing), AgentRadius = 0.3, AgentHeight = 1, AgentCanJump = false, AgentCanClimb = false })
-			local suc,err pcall(function()
-				path:ComputeAsync(hrp.Position - Vector3.new(0,3,0), Destination.Position + Vector3.new(0,1,0))
-			end)
-			local Waypoints = path:GetWaypoints()
-			if path.Status ~= Enum.PathStatus.NoPath and bools.Autoplay then
-				for _,v in pairs(Waypoints) do
-					local part = Instance.new("Part",fldr)
-					part.Position = v.Position
-					part.Size = Vector3.new(1,1,1)
-					part.Shape = Enum.PartType.Ball
-					part.Material = Enum.Material.Neon
-					part.BrickColor = BrickColor.new("Neon orange")
-					part.CanCollide = false
-					part.Anchored = true
-				end
-				for _, Waypoint in pairs(Waypoints) do
-					if LocalPlayer.Character.HumanoidRootPart.Anchored == false then
-						local reached = false
-						coroutine.wrap(function()
-							coroutine.wrap(function()
-								while not closed and not reached and task.wait(0) do
-									hum:MoveTo(Waypoint.Position)
-									if not bools.Autoplay then
-										reached = true
-									end
-								end
-							end)()
-							hum.MoveToFinished:Wait()
-							reached = true
-						end)()
-						repeat task.wait(0) until reached or closed
+	if floor ~= "Lobby" then
+		while not closed and floor ~= "Lobby" do
+			local Destination = getPath()
+			if Destination then
+				local path = PathfindingService:CreatePath({ WaypointSpacing = tonumber(waypointSpacing), AgentRadius = 0.3, AgentHeight = 1, AgentCanJump = false, AgentCanClimb = false })
+				local suc,err pcall(function()
+					path:ComputeAsync(hrp.Position - Vector3.new(0,3,0), Destination.Position + Vector3.new(0,1,0))
+				end)
+				local Waypoints = path:GetWaypoints()
+				if path.Status ~= Enum.PathStatus.NoPath and bools.Autoplay then
+					for _,v in pairs(Waypoints) do
+						local part = Instance.new("Part",fldr)
+						part.Position = v.Position
+						part.Size = Vector3.new(1,1,1)
+						part.Shape = Enum.PartType.Ball
+						part.Material = Enum.Material.Neon
+						part.BrickColor = BrickColor.new("Neon orange")
+						part.CanCollide = false
+						part.Anchored = true
 					end
+					for _, Waypoint in pairs(Waypoints) do
+						if LocalPlayer.Character.HumanoidRootPart.Anchored == false then
+							local reached = false
+							coroutine.wrap(function()
+								coroutine.wrap(function()
+									while not closed and not reached and task.wait(0) do
+										hum:MoveTo(Waypoint.Position)
+										if not bools.Autoplay then
+											reached = true
+										end
+									end
+								end)()
+								hum.MoveToFinished:Wait()
+								reached = true
+							end)()
+							repeat task.wait(0) until reached or closed
+						end
+					end
+				elseif path.Status == Enum.PathStatus.NoPath and bools.Autoplay then
+					hrp.Velocity = CFrame.lookAt(hrp.Position,Destination.Position).LookVector * hum.WalkSpeed
 				end
-			elseif path.Status == Enum.PathStatus.NoPath and bools.Autoplay then
-				hrp.Velocity = CFrame.lookAt(hrp.Position,Destination.Position).LookVector * hum.WalkSpeed
+				fldr:ClearAllChildren()
 			end
-			fldr:ClearAllChildren()
+			rs(1)
 		end
-		rs(1)
 	end
 	task.wait(1)
 	fldr:ClearAllChildren()
@@ -951,7 +960,7 @@ local function pplr(player)
 	end
 	coroutine.wrap(function()
 		pplr()
-		connectedFunctions[#connectedFunctions+1] = player.CharacterAdded:Connect(function(character)
+		connectedFunctions[#connectedFunctions+1] = player.CharacterAppearanceLoaded:Connect(function(character)
 			pplr()
 		end)
 	end)()
@@ -1007,29 +1016,38 @@ close.MouseButton1Click:Connect(function()
 	hum:SetAttribute("SpeedBoost",0)
 end)
 mainFrame.Visible = false
-local hwid
 local cant = false
+local own = MarketplaceService:UserOwnsGamePassAsync(plr.UserId, 195109922)
 task.spawn(function()
 	local http_request = syn and syn.request or request
 	local body, decoded
-	if http_request then
+	if http_request and not _G.hwid then
 		body = http_request({Url = 'https://httpbin.org/get'; Method = 'GET'}).Body
 		decoded = game:GetService('HttpService'):JSONDecode(body)
 		for i, v in pairs(decoded.headers) do
-			if string.find(i, 'Fingerprint') then hwid = v; break; end
+			if string.find(i, 'Fingerprint') then _G.hwid = v; break; end
 		end
 	else
 		cant = true
 	end
 end)
-repeat task.wait(0) until hwid or cant
-if not MarketplaceService:UserOwnsGamePassAsync(plr.UserId, 195109922) or not cant and hwidWhitelist[tostring(hwid)] ~= "whitelisted" then
-	pagelist.Notify("You dont own FireDoors!",10)
-	closed = true
-	task.wait(11)
-	screenGui:Destroy()
-	return
+pagelist.Notify("Please wait, loading the script!",5)
+repeat task.wait(0) until _G.hwid or cant
+if not own then
+	if hwidWhitelist[_G.hwid] == nil or hwidWhitelist[_G.hwid] == "blacklisted" then
+		if hwidWhitelist[_G.hwid] ~= "blacklisted" then
+			pagelist.Notify("You dont own FireDoors!",10)
+		else
+			pagelist.Notify("You are blacklisted!",10)
+		end
+		closed = true
+		_G.loaded123FireDoors = false
+		task.wait(11)
+		screenGui:Destroy()
+		return
+	end
 end
+mainFrame.Visible = true
 local page = pageList.CreatePage("Main")
 page.CreateLabel("Exclusive hub for "..fullName)
 page.CreateLabel("Hub updated [13.06.23] or [06.13.23]")
@@ -1557,34 +1575,6 @@ coroutine.wrap(function()
 		end
 	end
 end)()
-local function computePath(room:Instance)
-	local target,pp
-	if room then
-		target = room.Door.Door
-		local key = findFirstDescendant(room.Assets,"KeyObtain") or findFirstDescendant(room,"KeyObtain")
-		if key and not char:FindFirstChild("Key") then
-			target = key.Hitbox
-			pp = key.ModulePrompt
-		elseif key and char:FindFirstChild("Key") then
-			pp = room.Door.Lock.UnlockPrompt
-		end
-		for i,v in pairs(workspace:GetChildren()) do
-			if v and v:IsA("Model") and v:FindFirstChildOfClass("Part") and not game.Players:GetPlayerFromCharacter(v) then
-				if (hrp.Position-v:FindFirstChildOfClass("Part").Position).Magnitude <= 1000 and v.Name ~= "Eyes" then
-					target = nil
-					pp = nil
-				end
-			end
-		end
-		if room.Name == "50" then
-			target = workspace.CurrentRooms[tostring(tonumber(room.Name)+1)]:WaitForChild("Door"):WaitForChild("Door")
-			hrp.CanTouch = true
-		else
-			hrp.CanTouch = not bools.PlayerUntouchable
-		end
-	end
-	return target,pp
-end
 coroutine.wrap(function()
 	while not closed and game["Run Service"].Stepped:Wait() do
 		if bools.NoSliding then
